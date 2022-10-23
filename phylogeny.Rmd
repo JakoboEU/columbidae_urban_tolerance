@@ -1,0 +1,60 @@
+---
+title: "Phylogeny of Columbidae"
+output: html_notebook
+---
+
+```{r setup}
+library(phytools)
+library(dplyr)
+library(tidyverse)
+rm(list = ls())
+```
+
+
+Load a maximum clade credibility tree from jetz
+```{r}
+tree <- read.tree("./phylogeny__stage2_hackett_mcc_no_neg.tre")
+```
+
+Load urban tolerance data
+```{r}
+col_ut <- read_csv('./bigquery_export__columbidae_urban_tolerance.csv')
+```
+
+Check for species from data not in tree
+```{r}
+col_ut[!col_ut$jetz_scientific_name %in% tree$tip.label,]
+```
+
+
+Format data
+```{r}
+columbidae_input_species <- col_ut[col_ut$jetz_scientific_name %in% tree$tip.label,]
+tree_pruned_to_columbidae <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_ut$jetz_scientific_name)))
+
+columbidae_response <- columbidae_input_species$presence_ratio
+names(columbidae_response) <- columbidae_input_species$jetz_scientific_name
+
+head(columbidae_response)
+```
+
+Is the a phylogenetic signal for urban tolerance in the columbidae family
+```{r}
+col_ut_phylo_signal <- phylosig(tree_pruned_to_columbidae, columbidae_response, method="lambda", test=TRUE)
+col_ut_phylo_signal
+```
+
+Show the results for species
+```{r}
+col_continuous_trait_evolution <- contMap(tree_pruned_to_columbidae, columbidae_response)
+
+colourCount <- length(col_continuous_trait_evolution$cols)
+col_continuous_trait_evolution$cols[1:colourCount] <- rev(col_continuous_trait_evolution$col[1:colourCount])
+```
+
+```{r}
+plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
+```
+
+
+

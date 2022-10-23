@@ -56,5 +56,46 @@ col_continuous_trait_evolution$cols[1:colourCount] <- rev(col_continuous_trait_e
 plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
 ```
 
+----
+What about species in very few regional pools?
+----------------------------------------------
+```{r}
+ggplot(col_ut, aes(x = region_count)) + geom_bar()
+```
+Format data with species in more than 2 cities
+```{r}
+columbidae_reduced_input_species <- col_ut[col_ut$region_count > 2,]
+columbidae_reduced_input_species <- columbidae_reduced_input_species[columbidae_reduced_input_species$jetz_scientific_name %in% tree$tip.label,]
+tree_pruned_to_columbidae_reduced <- ladderize(drop.tip(tree, setdiff(tree$tip.label, columbidae_reduced_input_species$jetz_scientific_name)))
 
+columbidae_reduced_response <- columbidae_reduced_input_species$presence_ratio
+names(columbidae_reduced_response) <- columbidae_reduced_input_species$jetz_scientific_name
 
+head(columbidae_reduced_response)
+```
+
+Is the a phylogenetic signal for urban tolerance in the columbidae family with species in at least 2 regional pools
+```{r}
+col_ut_reduced_phylo_signal <- phylosig(tree_pruned_to_columbidae_reduced, columbidae_reduced_response, method="lambda", test=TRUE)
+col_ut_reduced_phylo_signal
+```
+
+Are species in low numbers of regional pool mostly present or absent?
+```{r}
+ggplot(col_ut[col_ut$region_count < 3,], aes(x = presence_ratio)) + geom_bar()
+```
+Is presence explained by number of regions?
+-------------------------------------------
+```{r}
+summary(lm(formula = presence_ratio ~ region_count, data = col_ut))
+```
+
+What about for low numbers of regional pools?
+```{r}
+summary(lm(formula = presence_ratio ~ region_count, data = col_ut[col_ut$region_count < 3,]))
+```
+
+What about for higher numbers of regional pools?
+```{r}
+summary(lm(formula = presence_ratio ~ region_count, data = col_ut[col_ut$region_count > 2, ]))
+```

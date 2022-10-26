@@ -18,7 +18,7 @@ tree <- read.tree("./phylogeny__stage2_hackett_mcc_no_neg.tre")
 
 Load urban tolerance data
 ```{r}
-col_ut <- read_csv('./bigquery_export__columbidae_urban_tolerance.csv')
+col_ut <- read_csv('./bigquery_export__columbidae_jetz_urban_tolerance.csv')
 ```
 
 Check for species from data not in tree
@@ -100,4 +100,83 @@ summary(lm(formula = urban_tolerance ~ region_count, data = col_ut[col_ut$region
 What about for higher numbers of regional pools?
 ```{r}
 summary(lm(formula = urban_tolerance ~ region_count, data = col_ut[col_ut$region_count > 5, ]))
+```
+
+Using Open Tree of Life
+-----------------------
+Load a maximum clade credibility tree from open tree
+https://tree.opentreeoflife.org/opentree/opentree13.4@ott363030/Columbiformes
+
+```{r}
+library(rotl)
+```
+
+```{r}
+colu <- read_csv('./bigquery_export__columbidae_ebird_urban_tolerance.csv')
+```
+
+
+```{r}
+taxa <- tnrs_match_names(unique(colu$species_name), context = "Birds")
+```
+
+```{r}
+taxa[!is.na(taxa$unique_name),]
+```
+
+```{r}
+opentree <- tol_induced_subtree(ott_id(taxa)[is_in_tree(ott_id(taxa))])
+opentree
+```
+
+```{r}
+plot(opentree, show.tip.label = FALSE)
+```
+
+```{r}
+opentree$tip.label[1:4]
+```
+
+```{r}
+taxon_map <- structure(taxa$search_string, names = taxa$unique_name)
+taxon_map['Streptopelia decaocto']
+```
+
+```{r}
+otl_tips <- strip_ott_ids(opentree$tip.label, remove_underscores = TRUE)
+opentree$tip.label <- taxon_map[ otl_tips ]
+opentree$node.label <- NULL
+opentree$tip.label[1:4]
+```
+
+
+Check for species from data not in tree
+```{r}
+colu$species_name <- tolower(colu$species_name)
+colu[!colu$species_name %in% opentree$tip.label,]
+```
+
+Format data
+```{r}
+columbidae_2_input_species <- colu[colu$species_name %in% opentree$tip.label,]
+opentree_pruned_to_columbidae <- ladderize(drop.tip(opentree, setdiff(opentree$tip.label, colu$species_name)))
+
+columbidae_2_response <- columbidae_2_input_species$urban_tolerance
+names(columbidae_2_response) <- columbidae_2_input_species$species_name
+
+head(columbidae_2_response)
+```
+
+There are no branch lengths in Open Tree of Life, so this does not work:
+```{r eval=FALSE}
+colu_phylo_signal <- phylosig(opentree_pruned_to_columbidae, columbidae_2_response, method="lambda", test=TRUE)
+colu_phylo_signal
+```
+
+There are no branch lengths in Open Tree of Life, so this does not work:
+```{r eval=FALSE}
+col2_continuous_trait_evolution <- contMap(opentree_pruned_to_columbidae, columbidae_2_response)
+
+colourCount <- length(col2_continuous_trait_evolution$cols)
+col2_continuous_trait_evolution$cols[1:colourCount] <- rev(col2_continuous_trait_evolution$col[1:colourCount])
 ```

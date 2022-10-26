@@ -1,139 +1,195 @@
-jetz_scientific_name,city_count,region_count,presence_ratio,birdlife_v3_family_name,birdlife_v3_family_name_english
-Columbina_passerina,8,22,0.364,Columbidae,Doves and pigeons
-Geotrygon_montana,1,16,0.063,Columbidae,Doves and pigeons
-Chalcophaps_indica,6,19,0.316,Columbidae,Doves and pigeons
-Columba_oenas,8,20,0.4,Columbidae,Doves and pigeons
-Columba_palumbus,16,21,0.762,Columbidae,Doves and pigeons
-Streptopelia_orientalis,17,43,0.395,Columbidae,Doves and pigeons
-Streptopelia_decaocto,42,64,0.656,Columbidae,Doves and pigeons
-Treron_calvus,0,7,0,Columbidae,Doves and pigeons
-Patagioenas_plumbea,1,8,0.125,Columbidae,Doves and pigeons
-Patagioenas_subvinacea,0,6,0,Columbidae,Doves and pigeons
-Columba_hodgsonii,0,3,0,Columbidae,Doves and pigeons
-Treron_pompadora,0,12,0,Columbidae,Doves and pigeons
-Treron_phoenicopterus,11,27,0.407,Columbidae,Doves and pigeons
-Alectroenas_madagascariensis,0,1,0,Columbidae,Doves and pigeons
-Ptilinopus_superbus,0,2,0,Columbidae,Doves and pigeons
-Columba_delegorguei,0,2,0,Columbidae,Doves and pigeons
-Columba_elphinstonii,0,3,0,Columbidae,Doves and pigeons
-Patagioenas_speciosa,0,7,0,Columbidae,Doves and pigeons
-Patagioenas_cayennensis,4,15,0.267,Columbidae,Doves and pigeons
-Columba_iriditorques,0,1,0,Columbidae,Doves and pigeons
-Zenaida_macroura,25,26,0.962,Columbidae,Doves and pigeons
-Columba_rupestris,0,5,0,Columbidae,Doves and pigeons
-Zenaida_asiatica,10,12,0.833,Columbidae,Doves and pigeons
-Streptopelia_capicola,3,6,0.5,Columbidae,Doves and pigeons
-Geopelia_placida,0,2,0,Columbidae,Doves and pigeons
-Leptotila_verreauxi,9,19,0.474,Columbidae,Doves and pigeons
-Columbina_talpacoti,11,15,0.733,Columbidae,Doves and pigeons
-Stigmatopelia_chinensis,46,52,0.885,Columbidae,Doves and pigeons
-Columba_eversmanni,0,7,0,Columbidae,Doves and pigeons
-Patagioenas_fasciata,5,17,0.294,Columbidae,Doves and pigeons
-Streptopelia_vinacea,0,2,0,Columbidae,Doves and pigeons
-Leptotila_rufaxilla,3,8,0.375,Columbidae,Doves and pigeons
-Streptopelia_tranquebarica,13,43,0.302,Columbidae,Doves and pigeons
-Geopelia_striata,6,6,1,Columbidae,Doves and pigeons
-Columbina_picui,2,3,0.667,Columbidae,Doves and pigeons
-Streptopelia_roseogrisea,1,5,0.2,Columbidae,Doves and pigeons
-Zenaida_auriculata,11,17,0.647,Columbidae,Doves and pigeons
-Streptopelia_turtur,6,30,0.2,Columbidae,Doves and pigeons
-Columba_leuconota,0,2,0,Columbidae,Doves and pigeons
-Stigmatopelia_senegalensis,34,43,0.791,Columbidae,Doves and pigeons
-Streptopelia_semitorquata,9,10,0.9,Columbidae,Doves and pigeons
-Columba_albitorques,1,1,1,Columbidae,Doves and pigeons
-Columba_livia,56,57,0.982,Columbidae,Doves and pigeons
-Oena_capensis,0,11,0,Columbidae,Doves and pigeons
-Columbina_minuta,0,11,0,Columbidae,Doves and pigeons
-Claravis_pretiosa,0,11,0,Columbidae,Doves and pigeons
-Streptopelia_lugens,2,2,1,Columbidae,Doves and pigeons
-Macropygia_unchall,0,5,0,Columbidae,Doves and pigeons
-Patagioenas_leucocephala,1,3,0.333,Columbidae,Doves and pigeons
-Treron_fulvicollis,0,2,0,Columbidae,Doves and pigeons
-Columba_arquatrix,2,5,0.4,Columbidae,Doves and pigeons
-Treron_olax,0,3,0,Columbidae,Doves and pigeons
-Treron_bicinctus,0,9,0,Columbidae,Doves and pigeons
-Ducula_aenea,3,14,0.214,Columbidae,Doves and pigeons
-Ducula_badia,0,7,0,Columbidae,Doves and pigeons
-Ducula_bicolor,1,5,0.2,Columbidae,Doves and pigeons
-Ptilinopus_leclancheri,0,3,0,Columbidae,Doves and pigeons
-Treron_vernans,5,7,0.714,Columbidae,Doves and pigeons
-Columba_punicea,0,1,0,Columbidae,Doves and pigeons
-Treron_sieboldii,2,13,0.154,Columbidae,Doves and pigeons
-Turtur_afer,1,5,0.2,Columbidae,Doves and pigeons
-Columbina_inca,6,9,0.667,Columbidae,Doves and pigeons
-Turtur_chalcospilos,0,3,0,Columbidae,Doves and pigeons
-Phaps_elegans,0,2,0,Columbidae,Doves and pigeons
-Turtur_abyssinicus,1,3,0.333,Columbidae,Doves and pigeons
-Phaps_chalcoptera,2,2,1,Columbidae,Doves and pigeons
-Columba_guinea,7,8,0.875,Columbidae,Doves and pigeons
-Geotrygon_frenata,0,2,0,Columbidae,Doves and pigeons
-Gallicolumba_tristigmata,0,1,0,Columbidae,Doves and pigeons
-Patagioenas_inornata,0,2,0,Columbidae,Doves and pigeons
-Geotrygon_chrysia,0,2,0,Columbidae,Doves and pigeons
-Macropygia_tenuirostris,1,1,1,Columbidae,Doves and pigeons
-Ducula_lacernulata,0,1,0,Columbidae,Doves and pigeons
-Treron_apicauda,0,2,0,Columbidae,Doves and pigeons
-Ptilinopus_jambu,1,3,0.333,Columbidae,Doves and pigeons
-Treron_formosae,0,3,0,Columbidae,Doves and pigeons
-Ptilinopus_melanospilus,1,2,0.5,Columbidae,Doves and pigeons
-Columba_unicincta,0,2,0,Columbidae,Doves and pigeons
-Aplopelia_larvata,0,5,0,Columbidae,Doves and pigeons
-Turtur_tympanistria,2,5,0.4,Columbidae,Doves and pigeons
-Geotrygon_linearis,0,2,0,Columbidae,Doves and pigeons
-Claravis_mondetoura,0,3,0,Columbidae,Doves and pigeons
-Claravis_godefrida,0,4,0,Columbidae,Doves and pigeons
-Geotrygon_violacea,0,5,0,Columbidae,Doves and pigeons
-Macropygia_ruficeps,0,3,0,Columbidae,Doves and pigeons
-Gallicolumba_luzonica,0,1,0,Columbidae,Doves and pigeons
-Geotrygon_caniceps,0,1,0,Columbidae,Doves and pigeons
-Columba_vitiensis,0,1,0,Columbidae,Doves and pigeons
-Treron_seimundi,0,1,0,Columbidae,Doves and pigeons
-Treron_curvirostra,1,6,0.167,Columbidae,Doves and pigeons
-Phapitreron_leucotis,1,1,1,Columbidae,Doves and pigeons
-Treron_griseicauda,1,1,1,Columbidae,Doves and pigeons
-Macropygia_emiliana,0,1,0,Columbidae,Doves and pigeons
-Columba_pulchricollis,1,1,1,Columbidae,Doves and pigeons
-Metriopelia_ceciliae,0,1,0,Columbidae,Doves and pigeons
-Streptopelia_bitorquata,1,2,0.5,Columbidae,Doves and pigeons
-Chalcophaps_stephani,0,1,0,Columbidae,Doves and pigeons
-Patagioenas_picazuro,4,4,1,Columbidae,Doves and pigeons
-Ocyphaps_lophotes,2,2,1,Columbidae,Doves and pigeons
-Patagioenas_corensis,0,1,0,Columbidae,Doves and pigeons
-Ducula_radiata,0,1,0,Columbidae,Doves and pigeons
-Ducula_luctuosa,0,1,0,Columbidae,Doves and pigeons
-Treron_capellei,0,2,0,Columbidae,Doves and pigeons
-Ptilinopus_merrilli,0,1,0,Columbidae,Doves and pigeons
-Patagioenas_maculosa,1,2,0.5,Columbidae,Doves and pigeons
-Columbina_squammata,3,8,0.375,Columbidae,Doves and pigeons
-Zenaida_aurita,1,2,0.5,Columbidae,Doves and pigeons
-Geotrygon_albifacies,0,1,0,Columbidae,Doves and pigeons
-Ducula_poliocephala,0,1,0,Columbidae,Doves and pigeons
-Treron_waalia,0,2,0,Columbidae,Doves and pigeons
-Ptilinopus_subgularis,0,1,0,Columbidae,Doves and pigeons
-Leptotila_pallida,0,1,0,Columbidae,Doves and pigeons
-Turtur_brehmeri,0,1,0,Columbidae,Doves and pigeons
-Leucosarcia_melanoleuca,1,2,0.5,Columbidae,Doves and pigeons
-Ptilinopus_porphyreus,0,1,0,Columbidae,Doves and pigeons
-Nesoenas_picturata,1,1,1,Columbidae,Doves and pigeons
-Columbina_cruziana,2,2,1,Columbidae,Doves and pigeons
-Geopelia_humeralis,1,1,1,Columbidae,Doves and pigeons
-Leptotila_ochraceiventris,0,1,0,Columbidae,Doves and pigeons
-Streptopelia_decipiens,2,3,0.667,Columbidae,Doves and pigeons
-Phapitreron_amethystinus,0,1,0,Columbidae,Doves and pigeons
-Columba_leucomela,1,1,1,Columbidae,Doves and pigeons
-Ptilinopus_regina,0,1,0,Columbidae,Doves and pigeons
-Patagioenas_squamosa,0,2,0,Columbidae,Doves and pigeons
-Treron_oxyurus,0,1,0,Columbidae,Doves and pigeons
-Ptilinopus_magnificus,0,1,0,Columbidae,Doves and pigeons
-Macropygia_phasianella,1,1,1,Columbidae,Doves and pigeons
-Treron_sphenurus,0,3,0,Columbidae,Doves and pigeons
-Columbina_buckleyi,1,1,1,Columbidae,Doves and pigeons
-Leptotila_plumbeiceps,0,1,0,Columbidae,Doves and pigeons
-Ptilinopus_occipitalis,0,1,0,Columbidae,Doves and pigeons
-Macropygia_amboinensis,0,1,0,Columbidae,Doves and pigeons
-Ptilinopus_marchei,0,1,0,Columbidae,Doves and pigeons
-Ducula_carola,0,1,0,Columbidae,Doves and pigeons
-Lopholaimus_antarcticus,1,1,1,Columbidae,Doves and pigeons
-Turacoena_manadensis,0,1,0,Columbidae,Doves and pigeons
-Metriopelia_melanoptera,0,2,0,Columbidae,Doves and pigeons
-Zenaida_meloda,1,1,1,Columbidae,Doves and pigeons
+jetz_scientific_name,region_count,city_count,urban_tolerance
+Treron_olax,11,5,0.45
+Turtur_afer,39,23,0.59
+Ducula_aenea,110,17,0.15
+Ducula_badia,45,5,0.11
+Ducula_pinon,2,1,0.5
+Ducula_zoeae,2,0,0.0
+Columba_livia,413,412,1.0
+Columba_oenas,171,111,0.65
+Ducula_carola,8,1,0.13
+Oena_capensis,52,25,0.48
+Phaps_elegans,6,4,0.67
+Treron_calvus,42,18,0.43
+Treron_waalia,18,5,0.28
+Columba_bollii,1,0,0.0
+Columba_guinea,36,33,0.92
+Columbina_inca,56,56,1.0
+Ducula_bicolor,21,8,0.38
+Ducula_radiata,2,0,0.0
+Ducula_rosacea,2,0,0.0
+Treron_oxyurus,1,0,0.0
+Treron_vernans,35,25,0.71
+Zenaida_aurita,10,9,0.9
+Zenaida_meloda,9,9,1.0
+Columba_punicea,10,2,0.2
+Columbina_picui,34,32,0.94
+Ducula_forsteni,2,0,0.0
+Ducula_luctuosa,3,0,0.0
+Nesoenas_mayeri,1,1,1.0
+Treron_apicauda,15,1,0.07
+Treron_capellei,10,1,0.1
+Treron_formosae,9,2,0.22
+Treron_seimundi,3,1,0.33
+Turtur_brehmeri,11,1,0.09
+Columba_janthina,1,0,0.0
+Columba_palumbus,210,183,0.87
+Columbina_minuta,73,36,0.49
+Geopelia_maugeus,2,2,1.0
+Geopelia_placida,6,6,1.0
+Geopelia_striata,33,33,1.0
+Geophaps_scripta,2,0,0.0
+Macropygia_magna,2,0,0.0
+Ptilinopus_jambu,14,0,0.0
+Ptilinopus_naina,2,0,0.0
+Treron_bicinctus,98,19,0.19
+Treron_pompadora,77,28,0.36
+Treron_sieboldii,40,13,0.33
+Treron_sphenurus,19,6,0.32
+Zenaida_asiatica,73,72,0.99
+Zenaida_macroura,158,151,0.96
+Aplopelia_larvata,20,0,0.0
+Claravis_pretiosa,84,17,0.2
+Columba_albinucha,3,0,0.0
+Columba_arquatrix,15,5,0.33
+Columba_hodgsonii,13,2,0.15
+Columba_leucomela,3,3,1.0
+Columba_leuconota,7,0,0.0
+Columba_rupestris,27,6,0.22
+Columba_unicincta,9,1,0.11
+Columba_vitiensis,14,1,0.07
+Ducula_rufigaster,2,0,0.0
+Ducula_spilorrhoa,1,1,1.0
+Geotrygon_chrysia,8,0,0.0
+Geotrygon_frenata,10,1,0.1
+Geotrygon_montana,102,18,0.18
+Leptotila_cassini,3,2,0.67
+Leptotila_pallida,3,2,0.67
+Ocyphaps_lophotes,6,6,1.0
+Phaps_chalcoptera,6,6,1.0
+Ptilinopus_regina,5,4,0.8
+Treron_psittaceus,2,0,0.0
+Trugon_terrestris,2,0,0.0
+Turacoena_modesta,2,0,0.0
+Chalcophaps_indica,109,53,0.49
+Claravis_godefrida,20,0,0.0
+Columba_eversmanni,51,2,0.04
+Columbina_buckleyi,3,3,1.0
+Columbina_cruziana,9,9,1.0
+Columbina_cyanopis,2,0,0.0
+Ducula_lacernulata,4,1,0.25
+Geopelia_humeralis,4,4,1.0
+Geotrygon_caniceps,4,0,0.0
+Geotrygon_linearis,13,2,0.15
+Geotrygon_mystacea,1,0,0.0
+Geotrygon_violacea,32,1,0.03
+Goura_scheepmakeri,2,0,0.0
+Leptotila_conoveri,1,1,1.0
+Leptotila_megalura,1,0,0.0
+Macropygia_unchall,21,4,0.19
+Metriopelia_aymara,4,1,0.25
+Nesoenas_picturata,2,0,0.0
+Otidiphaps_nobilis,2,0,0.0
+Ptilinopus_cinctus,3,2,0.67
+Ptilinopus_iozonus,2,1,0.5
+Ptilinopus_marchei,1,0,0.0
+Treron_curvirostra,35,10,0.29
+Treron_fulvicollis,12,1,0.08
+Treron_griseicauda,8,3,0.38
+Turtur_abyssinicus,16,8,0.5
+Zenaida_auriculata,116,101,0.87
+Caloenas_nicobarica,8,0,0.0
+Claravis_mondetoura,15,0,0.0
+Columba_albitorques,1,1,1.0
+Columba_delegorguei,2,0,0.0
+Columbina_passerina,113,92,0.81
+Columbina_squammata,49,37,0.76
+Columbina_talpacoti,115,105,0.91
+Ducula_poliocephala,9,0,0.0
+Geotrygon_lawrencii,1,0,0.0
+Geotrygon_saphirina,1,0,0.0
+Leptotila_rufaxilla,58,30,0.52
+Leptotila_verreauxi,128,113,0.88
+Macropygia_emiliana,8,1,0.13
+Macropygia_ruficeps,15,2,0.13
+Patagioenas_plumbea,41,12,0.29
+Ptilinopus_merrilli,2,0,0.0
+Ptilinopus_perlatus,2,0,0.0
+Ptilinopus_superbus,8,1,0.13
+Streptopelia_lugens,11,8,0.73
+Streptopelia_turtur,231,107,0.46
+Turtur_chalcospilos,22,16,0.73
+Turtur_tympanistria,35,19,0.54
+Uropelia_campestris,5,0,0.0
+Chalcophaps_stephani,5,0,0.0
+Columba_elphinstonii,16,1,0.06
+Columba_iriditorques,10,1,0.1
+Gallicolumba_hoedtii,2,0,0.0
+Geotrygon_albifacies,6,3,0.5
+Geotrygon_versicolor,1,0,0.0
+Metriopelia_ceciliae,7,6,0.86
+Patagioenas_araucana,4,4,1.0
+Patagioenas_caribaea,1,1,1.0
+Patagioenas_corensis,6,3,0.5
+Patagioenas_fasciata,73,46,0.63
+Patagioenas_goodsoni,1,0,0.0
+Patagioenas_inornata,9,4,0.44
+Patagioenas_maculosa,29,20,0.69
+Patagioenas_picazuro,49,47,0.96
+Patagioenas_speciosa,56,11,0.2
+Patagioenas_squamosa,8,5,0.63
+Phapitreron_leucotis,9,3,0.33
+Streptopelia_vinacea,16,13,0.81
+Turacoena_manadensis,3,0,0.0
+Columba_pulchricollis,6,1,0.17
+Columba_torringtoniae,1,1,1.0
+Gallicolumba_luzonica,4,0,0.0
+Gallicolumba_rufigula,2,0,0.0
+Henicophaps_albifrons,2,0,0.0
+Leptotila_jamaicensis,2,2,1.0
+Leptotila_plumbeiceps,7,2,0.29
+Ptilinopus_magnificus,5,0,0.0
+Ptilinopus_porphyreus,4,1,0.25
+Ptilinopus_subgularis,3,0,0.0
+Streptopelia_capicola,27,23,0.85
+Streptopelia_decaocto,442,354,0.8
+Treron_phoenicopterus,204,120,0.59
+Gallicolumba_crinigera,4,0,0.0
+Gallicolumba_jobiensis,2,0,0.0
+Geotrygon_chiriquensis,1,0,0.0
+Macropygia_amboinensis,5,1,0.2
+Macropygia_phasianella,3,3,1.0
+Patagioenas_subvinacea,26,13,0.5
+Ptilinopus_coronulatus,2,0,0.0
+Ptilinopus_leclancheri,15,0,0.0
+Ptilinopus_occipitalis,9,0,0.0
+Streptopelia_decipiens,20,15,0.75
+Geotrygon_costaricensis,1,0,0.0
+Leucosarcia_melanoleuca,4,3,0.75
+Lopholaimus_antarcticus,3,3,1.0
+Macropygia_nigrirostris,2,1,0.5
+Macropygia_tenuirostris,8,3,0.38
+Metriopelia_melanoptera,16,10,0.63
+Patagioenas_cayennensis,94,56,0.6
+Phapitreron_brunneiceps,4,0,0.0
+Ptilinopus_melanospilus,13,2,0.15
+Starnoenas_cyanocephala,3,0,0.0
+Stigmatopelia_chinensis,291,0,0.0
+Streptopelia_bitorquata,17,5,0.29
+Streptopelia_hypopyrrha,1,1,1.0
+Streptopelia_orientalis,222,117,0.53
+Cryptophaps_poecilorrhoa,2,0,0.0
+Gallicolumba_tristigmata,3,0,0.0
+Patagioenas_flavirostris,26,21,0.81
+Patagioenas_leucocephala,11,8,0.73
+Patagioenas_nigrirostris,2,0,0.0
+Phapitreron_amethystinus,8,1,0.13
+Ptilinopus_aurantiifrons,2,0,0.0
+Streptopelia_roseogrisea,25,17,0.68
+Hemiphaga_novaeseelandiae,2,2,1.0
+Leptotila_ochraceiventris,2,0,0.0
+Reinwardtoena_reinwardtsi,2,0,0.0
+Streptopelia_semitorquata,52,50,0.96
+Stigmatopelia_senegalensis,266,0,0.0
+Streptopelia_tranquebarica,211,126,0.6
+Alectroenas_madagascariensis,1,1,1.0

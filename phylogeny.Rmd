@@ -32,7 +32,7 @@ Format data
 columbidae_input_species <- col_ut[col_ut$jetz_scientific_name %in% tree$tip.label,]
 tree_pruned_to_columbidae <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_ut$jetz_scientific_name)))
 
-columbidae_response <- columbidae_input_species$presence_ratio
+columbidae_response <- columbidae_input_species$urban_tolerance
 names(columbidae_response) <- columbidae_input_species$jetz_scientific_name
 
 head(columbidae_response)
@@ -62,13 +62,14 @@ What about species in very few regional pools?
 ```{r}
 ggplot(col_ut, aes(x = region_count)) + geom_bar()
 ```
+
 Format data with species in more than 2 cities
 ```{r}
-columbidae_reduced_input_species <- col_ut[col_ut$region_count > 2,]
+columbidae_reduced_input_species <- col_ut[col_ut$region_count > 5,]
 columbidae_reduced_input_species <- columbidae_reduced_input_species[columbidae_reduced_input_species$jetz_scientific_name %in% tree$tip.label,]
 tree_pruned_to_columbidae_reduced <- ladderize(drop.tip(tree, setdiff(tree$tip.label, columbidae_reduced_input_species$jetz_scientific_name)))
 
-columbidae_reduced_response <- columbidae_reduced_input_species$presence_ratio
+columbidae_reduced_response <- columbidae_reduced_input_species$urban_tolerance
 names(columbidae_reduced_response) <- columbidae_reduced_input_species$jetz_scientific_name
 
 head(columbidae_reduced_response)
@@ -82,20 +83,21 @@ col_ut_reduced_phylo_signal
 
 Are species in low numbers of regional pool mostly present or absent?
 ```{r}
-ggplot(col_ut[col_ut$region_count < 3,], aes(x = presence_ratio)) + geom_bar()
+ggplot(col_ut[col_ut$region_count < 5,], aes(x = urban_tolerance)) + geom_bar()
 ```
+
 Is presence explained by number of regions?
 -------------------------------------------
 ```{r}
-summary(lm(formula = presence_ratio ~ region_count, data = col_ut))
+summary(lm(formula = urban_tolerance ~ region_count, data = col_ut))
 ```
 
 What about for low numbers of regional pools?
 ```{r}
-summary(lm(formula = presence_ratio ~ region_count, data = col_ut[col_ut$region_count < 3,]))
+summary(lm(formula = urban_tolerance ~ region_count, data = col_ut[col_ut$region_count < 5,]))
 ```
 
 What about for higher numbers of regional pools?
 ```{r}
-summary(lm(formula = presence_ratio ~ region_count, data = col_ut[col_ut$region_count > 2, ]))
+summary(lm(formula = urban_tolerance ~ region_count, data = col_ut[col_ut$region_count > 5, ]))
 ```

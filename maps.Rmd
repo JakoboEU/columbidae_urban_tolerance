@@ -1,0 +1,158 @@
+---
+title: "Maps of Columbidae"
+output: html_notebook
+---
+
+```{r setup}
+library(dplyr)
+library(tidyverse)
+library(sf)
+rm(list = ls())
+```
+
+Constants
+---------
+```{r}
+PRESENT_SHAPE = 20
+ABSENT_SHAPE = 4
+PRESENT_COLOUR = "blue"
+ABSENT_COLOUR = "red"
+```
+
+Load required data
+------------------
+```{r}
+col_ut <- read_csv('./bigquery_export__columbidae_jetz_urban_tolerance.csv')
+```
+
+```{r}
+col_loc <- read_csv('./bigquery_export__columbidae_jetz_urban_locations.csv')
+```
+
+```{r}
+country_outlines <- read_sf('./world_country_outlines/world-administrative-boundaries.shp')
+country_outlines
+```
+
+```{r}
+st_crs(country_outlines)
+```
+
+```{r}
+ggplot() +  
+  geom_sf(data = country_outlines, aes(geometry = geometry))
+```
+
+```{r}
+col_ut %>% arrange(urban_tolerance)
+```
+
+```{r}
+world_cities <- read_sf('./urban_centres/urban_centres.shp')
+world_cities <- distinct(world_cities[,c('fid', 'geometry')])
+names(world_cities) <- c('city_id', 'geometry')
+world_cities
+```
+
+```{r}
+ggplot() +  
+  geom_sf(data = world_cities, aes(geometry = geometry))
+```
+
+```{r}
+st_crs(world_cities)
+```
+
+```{r}
+world_cities <- st_transform(world_cities, crs = st_crs(country_outlines))
+```
+
+------------------------------------------------------------
+Plot locations cities with pigeons with zero urban tolerance
+------------------------------------------------------------
+```{r}
+intolerance_absence_records = col_loc[col_loc$jetz_scientific_name %in% col_ut$jetz_scientific_name[col_ut$urban_tolerance == 0],]
+intolerance_absence_records
+```
+
+```{r}
+absent_cities = left_join(intolerance_absence_records, world_cities)
+absent_cities
+```
+
+```{r}
+ggplot() +  
+  geom_sf(data = country_outlines, aes(geometry = geometry)) +
+  geom_sf(data = absent_cities, aes(geometry = geometry), shape = ABSENT_SHAPE, color = ABSENT_COLOUR, show.legend = "point") +
+  labs(title = "Columbidae with zero urban tolerance") + 
+  theme_bw()
+```
+
+------------------------------------------------------------
+Plot locations cities with pigeons with full urban tolerance
+------------------------------------------------------------
+```{r}
+tolerant_presence_records = col_loc[col_loc$jetz_scientific_name %in% col_ut$jetz_scientific_name[col_ut$urban_tolerance == 1],]
+tolerant_presence_records[tolerant_presence_records$jetz_scientific_name != 'Columba_livia',]
+```
+
+```{r}
+present_cities = left_join(tolerant_presence_records[tolerant_presence_records$jetz_scientific_name != 'Columba_livia',], world_cities)
+present_cities
+```
+
+```{r}
+ggplot() +  
+  geom_sf(data = country_outlines, aes(geometry = geometry)) +
+  geom_sf(data = present_cities, aes(geometry = geometry), shape = PRESENT_SHAPE, color = PRESENT_COLOUR, show.legend = "point") +
+  labs(title = "Columbidae with full urban tolerance", subtitle = "Except Columba livia") + 
+  theme_bw()
+```
+
+------------------------------------------------------------
+Plot locations of most common pigeons
+------------------------------------------------------------
+```{r}
+most_common_eight = col_ut[col_ut$jetz_scientific_name != 'Columba_livia',] %>% arrange(desc(city_count)) %>% head(8)
+most_common_eight
+```
+
+```{r}
+most_common_eight_locations = col_loc[col_loc$jetz_scientific_name %in% most_common_eight$jetz_scientific_name,]
+most_common_eight_locations
+```
+```{r}
+most_common_eight_locations[most_common_eight_locations$jetz_scientific_name == 'Columba_oenas',]
+```
+
+```{r}
+most_common_cities = left_join(most_common_eight_locations, world_cities)
+most_common_cities$binomial = str_replace(most_common_cities$jetz_scientific_name, '_', ' ')
+most_common_cities
+```
+
+```{r, fig.width = 12, fig.height = 12}
+ggplot() +  
+  geom_sf(data = country_outlines, aes(geometry = geometry)) +
+  geom_sf(data = most_common_cities, aes(geometry = geometry, shape = present_in_city, color = present_in_city), show.legend = "point") +
+  facet_wrap(~ binomial, ncol = 2) +
+  scale_colour_manual(name = "Presence",
+                     limits = c(F, T),
+                      labels = c("Regional pool", "City"),
+                      values = c(ABSENT_COLOUR, PRESENT_COLOUR)) +   
+  scale_shape_manual(name = "Presence",
+                     limits = c(F, T),
+                     labels = c("Regional pool", "City"),
+                     values = c(ABSENT_SHAPE, PRESENT_SHAPE)) +
+  theme_bw() + 
+  theme(legend.position="bottom") + 
+  labs(title = "8 most commonly occuring Columbidae", subtitle = "Except Columba livia")
+```
+
+
+
+
+
+
+
+

@@ -110,6 +110,14 @@ ggplot() +
 ```
 
 ------------------------------------------------------------
+Create species title for presence records
+------------------------------------------------------------
+```{r}
+col_ut$title = paste(str_replace(col_ut$jetz_scientific_name, '_', ' '), ' (', col_ut$urban_tolerance, ')', sep = '')
+head(col_ut$title)
+```
+
+------------------------------------------------------------
 Plot locations of most common pigeons
 ------------------------------------------------------------
 ```{r}
@@ -132,15 +140,15 @@ most_common_locations[most_common_locations$jetz_scientific_name == 'Columba_oen
 
 ```{r}
 most_common_cities = left_join(most_common_locations, world_cities)
-most_common_cities$binomial = str_replace(most_common_cities$jetz_scientific_name, '_', ' ')
+most_common_cities = left_join(most_common_cities, col_ut[,c('jetz_scientific_name', 'title')])
 most_common_cities
 ```
 
-```{r, fig.width = 12, fig.height = 24}
+```{r, fig.width = 12, fig.height = 20}
 ggplot() +  
   geom_sf(data = country_outlines, aes(geometry = geometry)) +
   geom_sf(data = most_common_cities, aes(geometry = geometry, shape = present_in_city, color = present_in_city), show.legend = "point") +
-  facet_wrap(~ binomial, ncol = 2) +
+  facet_wrap(~ title, ncol = 2) +
   scale_colour_manual(name = "Presence",
                      limits = c(F, T),
                       labels = c("Regional pool", "City"),
@@ -159,56 +167,64 @@ Investigate seasonal distributions, are these related to presence?
 --------------------------------------------------------------------------
 ```{r}
 dist <- read_sf('./distributions/columbidae.shp')
-dist
-```
-
-```{r}
-dist$season_factor = factor(dist$seasonal, levels = c(1, 2, 3, 4, 5),, labels = c("Resident", "Breeding", "Non-breeding", "Passage", "Uncertain"))
+head(dist)
 ```
 
 
 ```{r}
-ggplot() +  
-  geom_sf(data = country_outlines, aes(geometry = geometry)) +
-  geom_sf(data = dist[dist$binomial == 'Zenaida macroura',], aes(geometry = geometry, fill = season_factor), alpha = 0.2) +
-  geom_sf(data = most_common_cities[most_common_cities$binomial == 'Zenaida macroura',], aes(geometry = geometry, shape = present_in_city, color = present_in_city)) +
-  guides(fill=guide_legend(title="Distribution")) +
-  scale_colour_manual(name = "Presence",
-                     limits = c(F, T),
-                      labels = c("Regional pool", "City"),
-                      values = c(ABSENT_COLOUR, PRESENT_COLOUR)) +   
-  scale_shape_manual(name = "Presence",
-                     limits = c(F, T),
-                     labels = c("Regional pool", "City"),
-                     values = c(ABSENT_SHAPE, PRESENT_SHAPE))
+dist$season_factor = factor(dist$seasonal, levels = c(1, 2, 3, 4, 5), labels = c("Resident", "Breeding", "Non-breeding", "Passage", "Uncertain"))
 ```
 
 ```{r}
-most_common_dists = dist[dist$binomial %in% most_common_cities$binomial,]
-most_common_dists
-```
-
-```{r, fig.width = 12, fig.height = 12}
-ggplot() +  
-  geom_sf(data = country_outlines, aes(geometry = geometry)) +
-  geom_sf(data = most_common_dists, aes(geometry = geometry, fill = season_factor), alpha = 0.2) +
-  geom_sf(data = most_common_cities, aes(geometry = geometry, shape = present_in_city, color = present_in_city)) +
-  facet_wrap(~ binomial, ncol = 2) +
-  scale_colour_manual(name = "Presence",
-                     limits = c(F, T),
-                      labels = c("Regional pool", "City"),
-                      values = c(ABSENT_COLOUR, PRESENT_COLOUR)) +   
-  scale_shape_manual(name = "Presence",
-                     limits = c(F, T),
-                     labels = c("Regional pool", "City"),
-                     values = c(ABSENT_SHAPE, PRESENT_SHAPE)) +
-  theme_bw() + 
-  theme(legend.position="bottom") + 
-  labs(title = paste(TOP_X, "most commonly occuring Columbidae"), subtitle = "Except Columba livia") +
-  guides(fill=guide_legend(title="Distribution"))
+mapping <- read_csv('./bigquery_export__columbidae_taxonomic_mapping.csv')
+dist = left_join(dist, mapping, by = c('binomial' = 'species_name'))
+head(dist)
 ```
 
 
 
+```{r, fig.width = 12, fig.height = 20}
+plot_species = function(species_list_to_city_id, plot_title) {
+  cities = left_join(species_list_to_city_id, col_loc[,c('jetz_scientific_name', 'present_in_city', 'city_id')])
+  cities = left_join(cities, world_cities[,c('city_id', 'geometry')])
+  cities = left_join(cities, col_ut[,c('jetz_scientific_name', 'title')])
+  
+  dists = left_join(species_list_to_city_id, dist[, c('jetz_scientific_name', 'season_factor', 'geometry')])
+  dists = left_join(dists, col_ut[,c('jetz_scientific_name', 'title')])
+  
+  ggplot() +  
+    geom_sf(data = country_outlines, aes(geometry = geometry)) +
+    geom_sf(data = dists, aes(geometry = geometry, fill = season_factor), alpha = 0.2) +
+    geom_sf(data = cities, aes(geometry = geometry, shape = present_in_city, color = present_in_city)) +
+    facet_wrap(~ title, ncol = 2) +
+    scale_colour_manual(name = "Presence",
+                       limits = c(F, T),
+                        labels = c("Regional pool", "City"),
+                        values = c(ABSENT_COLOUR, PRESENT_COLOUR)) +   
+    scale_shape_manual(name = "Presence",
+                       limits = c(F, T),
+                       labels = c("Regional pool", "City"),
+                       values = c(ABSENT_SHAPE, PRESENT_SHAPE)) +
+    theme_bw() + 
+    theme(legend.position="bottom") + 
+    labs(title = paste(TOP_X, plot_title), subtitle = "Except Columba livia") +
+    guides(fill=guide_legend(title="Distribution"))
+}
+```
 
 
+```{r, fig.width = 12, fig.height = 20}
+plot_species(most_common[,c('jetz_scientific_name')], 'most commonly occuring Columbidae') 
+```
+
+```{r, fig.width = 12, fig.height = 20}
+least_tolerant = col_ut[col_ut$jetz_scientific_name != 'Columba_livia',] %>% filter(region_count > 5) %>% arrange(urban_tolerance) %>% head(TOP_X)
+plot_species(least_tolerant[,c('jetz_scientific_name')], 'least urban tolerant Columbidae') 
+```
+
+
+
+```{r, fig.width = 12, fig.height = 20}
+most_tolerant = col_ut[col_ut$jetz_scientific_name != 'Columba_livia',] %>% filter(region_count > 5) %>% arrange(desc(urban_tolerance)) %>% head(TOP_X)
+plot_species(most_tolerant[,c('jetz_scientific_name')], 'most urban tolerant Columbidae') 
+```

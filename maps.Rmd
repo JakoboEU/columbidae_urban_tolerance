@@ -215,11 +215,13 @@ plot_species = function(species_list_to_city_id, plot_title) {
 
 ```{r, fig.width = 12, fig.height = 20}
 plot_species(most_common[,c('jetz_scientific_name')], 'most commonly occuring Columbidae') 
+ggsave("outputs/map_most_common.jpg")
 ```
 
 ```{r, fig.width = 12, fig.height = 20}
 least_tolerant = col_ut[col_ut$jetz_scientific_name != 'Columba_livia',] %>% filter(region_count > 5) %>% arrange(urban_tolerance) %>% head(TOP_X)
-plot_species(least_tolerant[,c('jetz_scientific_name')], 'least urban tolerant Columbidae') 
+plot_species(least_tolerant[,c('jetz_scientific_name')], 'least urban tolerant Columbidae')
+ggsave("outputs/map_least_tolerant.jpg")
 ```
 
 
@@ -227,4 +229,5 @@ plot_species(least_tolerant[,c('jetz_scientific_name')], 'least urban tolerant C
 ```{r, fig.width = 12, fig.height = 20}
 most_tolerant = col_ut[col_ut$jetz_scientific_name != 'Columba_livia',] %>% filter(region_count > 5) %>% arrange(desc(urban_tolerance)) %>% head(TOP_X)
 plot_species(most_tolerant[,c('jetz_scientific_name')], 'most urban tolerant Columbidae') 
+ggsave("outputs/map_most_tolerant.jpg")
 ```

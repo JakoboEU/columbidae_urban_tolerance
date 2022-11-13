@@ -53,7 +53,8 @@ col_continuous_trait_evolution$cols[1:colourCount] <- rev(col_continuous_trait_e
 ```
 
 ```{r}
-plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
+cte_all = plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
+cte_all
 ```
 
 ----
@@ -102,6 +103,62 @@ What about for higher numbers of regional pools?
 summary(lm(formula = urban_tolerance ~ region_count, data = col_ut[col_ut$region_count > 5, ]))
 ```
 
+----------------------------------------------
+What about species in at least 5 regional pools?
+----------------------------------------------
+```{r}
+col_ut5 = col_ut[col_ut$region_count >= 5,]
+```
+
+```{r}
+columbidae5_input_species <- col_ut5[col_ut5$jetz_scientific_name %in% tree$tip.label,]
+tree_pruned_to_columbidae5 <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_ut5$jetz_scientific_name)))
+
+columbidae5_response <- columbidae5_input_species$urban_tolerance
+names(columbidae5_response) <- columbidae5_input_species$jetz_scientific_name
+
+head(columbidae5_response)
+```
+
+Is the a phylogenetic signal for urban tolerance in the columbidae family
+```{r}
+col_ut5_phylo_signal <- phylosig(tree_pruned_to_columbidae5, columbidae5_response, method="lambda", test=TRUE)
+col_ut5_phylo_signal
+```
+
+Show the results for species
+```{r}
+col5_continuous_trait_evolution <- contMap(tree_pruned_to_columbidae5, columbidae5_response)
+
+colourCount <- length(col5_continuous_trait_evolution$cols)
+col5_continuous_trait_evolution$cols[1:colourCount] <- rev(col5_continuous_trait_evolution$col[1:colourCount])
+```
+
+```{r}
+cte_5 = plot(col5_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
+cte_5
+```
+
+Store CTE plots
+---------------
+```{r}
+par(mfrow=c(1,2)) 
+plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
+text(0, 65, "All species")
+plot(col5_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
+text(0, 60, "Min. 5 regional pools")
+```
+```{r}
+jpeg("outputs/phylo.jpg", width = 2056, height = 1024)
+par(mfrow=c(1,2)) 
+plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.8, lwd=3, leg.txt="Cities/Regional Pools", type = "fan")
+text(0, 46, "All species", cex=2)
+plot(col5_continuous_trait_evolution, outline=FALSE, fsize=1, lwd=3, leg.txt="Cities/Regional Pools", type = "fan")
+text(0, 49, "Min. 5 regional pools", cex=2)
+dev.off()
+```
+
+-----------------------
 Using Open Tree of Life
 -----------------------
 Load a maximum clade credibility tree from open tree

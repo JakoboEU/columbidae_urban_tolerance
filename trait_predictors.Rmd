@@ -1,0 +1,86 @@
+---
+title: "Trait predictors for presence"
+output: html_notebook
+---
+
+```{r setup}
+library(dplyr)
+library(tidyverse)
+library(ggpubr)
+library(grid)
+rm(list = ls())
+
+col_ut <- read_csv('./bigquery_export__columbidae_jetz_urban_tolerance.csv')
+mapping <- read_csv('./bigquery_export__columbidae_taxonomic_mapping.csv')
+traits <- read_csv('./bigquery_export__columbidae_feeding_guilds.csv')
+
+pigeons = left_join(col_ut, mapping)
+pigeons = left_join(pigeons, traits, by = c('species_name' = 'scientific_name'))
+pigeons = pigeons[!is.na(pigeons$trophic_niche),c('jetz_scientific_name', 'region_count', 'city_count', 'urban_tolerance', 'trophic_niche', 'foraging_niche', 'pc1', 'pc2', 'pc3', 'pc4')]
+pigeons$trophic_niche = as.factor(pigeons$trophic_niche)
+pigeons$foraging_niche = as.factor(pigeons$foraging_niche)
+
+pigeons5 = pigeons[pigeons$region_count >= 5,]
+
+pigeons
+```
+
+----------------------------
+First look at feeding niches
+----------------------------
+```{r}
+figure1 = ggarrange(ncol = 2, nrow = 1,
+  ggplot(pigeons, aes(x = trophic_niche, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "All species") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons5, aes(x = trophic_niche, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "Min. 5 regional pools") + rremove("ylab") + rremove("xlab")
+)
+
+annotate_figure(figure1, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)),
+                    bottom = textGrob("Trophic niche"))
+```
+```{r}
+figure2 = ggarrange(ncol = 2, nrow = 1,
+  ggplot(pigeons, aes(x = foraging_niche, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "All species") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons5, aes(x = foraging_niche, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "Min. 5 regional pools") + rremove("ylab") + rremove("xlab")
+)
+
+annotate_figure(figure2, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)),
+                    bottom = textGrob("Foraging niche"))
+```
+
+-----------------------
+What about morphology?
+-----------------------
+
+```{r}
+figure3 = ggarrange(ncol = 2, nrow = 2,
+  ggplot(pigeons, aes(x = pc1, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC1") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons, aes(x = pc2, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC2") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons, aes(x = pc3, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC3") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons, aes(x = pc4, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC4") + rremove("ylab") + rremove("xlab")
+)
+
+annotate_figure(figure3, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)), top = textGrob("All species"))
+```
+```{r}
+figure4 = ggarrange(ncol = 2, nrow = 2,
+  ggplot(pigeons5, aes(x = pc1, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC1") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons5, aes(x = pc2, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC2") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons5, aes(x = pc3, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC3") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons5, aes(x = pc4, y = urban_tolerance)) + 
+    geom_point() + labs(title = "PC4") + rremove("ylab") + rremove("xlab")
+)
+
+annotate_figure(figure4, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)), top = textGrob("Min. 5 regional pools"))
+```
+

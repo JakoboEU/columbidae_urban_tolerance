@@ -169,7 +169,7 @@ library(rotl)
 ```
 
 ```{r}
-colu <- read_csv('./bigquery_export__columbidae_ebird_urban_tolerance.csv')
+colu <- read_csv('./bigquery_export__columbidae_birdlife_urban_tolerance.csv')
 ```
 
 

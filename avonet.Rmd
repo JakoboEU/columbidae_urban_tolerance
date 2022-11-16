@@ -1,0 +1,355 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+library(dplyr)
+library(tidyverse)
+library(factoextra)
+library(densityClust)
+library(stats)
+library(sf)
+library(dplyr)
+library(tidyverse)
+library(ggpubr)
+library(grid)
+library(vegan)
+library(GGally)
+library(phytools)
+library(picante)
+rm(list = ls())
+```
+
+```{r}
+col_loc = read_csv('./bigquery_export__columbidae_birdlife_urban_locations.csv')
+head(col_loc)
+```
+
+```{r}
+col_ut = read_csv('./bigquery_export__columbidae_birdlife_urban_tolerance.csv')
+head(col_ut)
+```
+
+```{r}
+avonet_birdlife = read_csv('./avonet_birdlife.csv')
+head(avonet_birdlife)
+```
+
+Check we have traits for all species in our dataset
+```{r}
+distinct(col_loc[!col_loc$species_name %in% avonet_birdlife$Species1,])
+distinct(col_ut[!col_ut$species_name %in% avonet_birdlife$Species1,])
+```
+
+
+
+Bregman et al. (2015): https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/14-1731.1
+Trisos et al. (2014)
+locomotory (tail, wing, and tarsus length) 
+trophic (beak length, width, and depth) traits
+
+```{r}
+col_traits = avonet_birdlife[avonet_birdlife$Species1 %in% col_loc$species_name,c('Species1', 'Beak.Length_Culmen', 'Beak.Width', 'Beak.Depth', 'Tail.Length', 'Hand-Wing.Index', 'Tarsus.Length', 'Habitat', 'Habitat.Density', 'Trophic.Niche', 'Primary.Lifestyle', 'Range.Size', 'Mass')]
+names(col_traits) <- c('species_name', 'beak_length', 'beak_width', 'beak_depth', 'tail_length', 'wing_index', 'tarsus_length', 'habitat', 'habitat_density', 'trophic_niche', 'primary_lifestyle', 'range_size', 'mass')
+col_traits
+```
+
+```{r}
+pigeons = left_join(col_ut[,c('species_name', 'urban_tolerance', 'region_count')], col_traits)
+pigeons
+```
+
+```{r}
+pigeons5 = pigeons[pigeons$region_count >= 5,]
+```
+
+```{r}
+shapiro.test(pigeons$urban_tolerance) #p <= 0.05   -> Significantly different from normal
+```
+
+----------------------------
+Trophic niches
+----------------------------
+```{r}
+figure1 = ggarrange(ncol = 2, nrow = 1,
+  ggplot(pigeons, aes(x = trophic_niche, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "All species") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons5, aes(x = trophic_niche, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "Min. 5 regional pools") + rremove("ylab") + rremove("xlab")
+)
+
+annotate_figure(figure1, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)),
+                    bottom = textGrob("Trophic niche"))
+```
+```{r}
+kruskal.test(pigeons$urban_tolerance~pigeons$trophic_niche)
+pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$trophic_niche)
+```
+
+# Urban tolerance was significantly different between different trophic niches (Chi-squared=19.31, df=2, p<0.001), with urban tolerance significantly 
+# lower in Frugivores compared to Granivores.
+
+```{r}
+kruskal.test(pigeons5$urban_tolerance~pigeons5$trophic_niche)
+pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$trophic_niche)
+```
+
+----------------
+Habitat
+----------------
+```{r}
+figure2 = ggarrange(ncol = 2, nrow = 1,
+  ggplot(pigeons, aes(x = habitat, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "All species") + rremove("ylab") + rremove("xlab") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)),
+  ggplot(pigeons5, aes(x = habitat, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "Min. 5 regional pools") + rremove("ylab") + rremove("xlab") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+)
+
+annotate_figure(figure2, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)),
+                    bottom = textGrob("Habitat"))
+```
+
+```{r}
+kruskal.test(pigeons$urban_tolerance~pigeons$habitat)
+pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$habitat)
+```
+
+# Urban tolerance was significantly different between different trophic niches (Chi-squared=42.834, df=6, p<0.001)
+
+```{r}
+kruskal.test(pigeons5$urban_tolerance~pigeons5$habitat)
+pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$habitat)
+```
+
+```{r}
+figure3 = ggarrange(ncol = 2, nrow = 1,
+  ggplot(pigeons, aes(x = as.factor(habitat_density), y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "All species") + rremove("ylab") + rremove("xlab") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)),
+  ggplot(pigeons5, aes(x = as.factor(habitat_density), y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "Min. 5 regional pools") + rremove("ylab") + rremove("xlab") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+)
+
+annotate_figure(figure3, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)),
+                    bottom = textGrob("Habitat Density"))
+```
+```{r}
+kruskal.test(pigeons$urban_tolerance~pigeons$habitat_density)
+pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$habitat_density)
+```
+----------------------------
+Lifestyle
+----------------------------
+```{r}
+figure4 = ggarrange(ncol = 2, nrow = 1,
+  ggplot(pigeons, aes(x = primary_lifestyle, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "All species") + rremove("ylab") + rremove("xlab"),
+  ggplot(pigeons5, aes(x = primary_lifestyle, y = urban_tolerance)) + 
+    geom_boxplot() + labs(title = "Min. 5 regional pools") + rremove("ylab") + rremove("xlab")
+)
+
+annotate_figure(figure4, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)),
+                    bottom = textGrob("Primary Lifestyle"))
+```
+
+```{r}
+kruskal.test(pigeons$urban_tolerance~pigeons$primary_lifestyle)
+pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$primary_lifestyle)
+```
+
+# Urban tolerance was significantly different between different trophic niches (Chi-squared=7.23, df=2, p = 0.03), with urban tolerance significantly 
+# lower in Insessorial (perching) compared to Terrestrial and Generalist
+
+```{r}
+kruskal.test(pigeons5$urban_tolerance~pigeons5$primary_lifestyle)
+pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$primary_lifestyle)
+```
+
+--------------------------
+Create at locomotion trait
+--------------------------
+```{r}
+loco_pca = rda(pigeons[,c('tarsus_length', 'wing_index', 'tail_length')])
+pigeons$loco_pc1 = loco_pca$Ybar[,1]
+pigeons$loco_pc2 = loco_pca$Ybar[,2]
+pigeons$loco_pc3 = loco_pca$Ybar[,3]
+summary(loco_pca)
+```
+
+```{r}
+ggarrange(ncol = 4, nrow = 3,
+  ggplot(pigeons, aes(x = loco_pc1, y = tarsus_length)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc1,pigeons$tarsus_length)),
+  ggplot(pigeons, aes(x = loco_pc1, y = wing_index)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc1,pigeons$wing_index)),
+  ggplot(pigeons, aes(x = loco_pc1, y = tail_length)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc1,pigeons$tail_length)),
+  ggplot(pigeons, aes(x = loco_pc1, y = mass)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc1,pigeons$mass)),
+  ggplot(pigeons, aes(x = loco_pc2, y = tarsus_length)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc2,pigeons$tarsus_length)),
+  ggplot(pigeons, aes(x = loco_pc2, y = wing_index)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc2,pigeons$wing_index)),
+  ggplot(pigeons, aes(x = loco_pc2, y = tail_length)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc2,pigeons$tail_length)),
+  ggplot(pigeons, aes(x = loco_pc2, y = mass)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc2,pigeons$mass)),
+  ggplot(pigeons, aes(x = loco_pc3, y = tarsus_length)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc3,pigeons$tarsus_length)),
+  ggplot(pigeons, aes(x = loco_pc3, y = wing_index)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc3,pigeons$wing_index)),
+  ggplot(pigeons, aes(x = loco_pc3, y = tail_length)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc3,pigeons$tail_length)),
+  ggplot(pigeons, aes(x = loco_pc3, y = mass)) + geom_point() + labs(subtitle = cor(pigeons$loco_pc3,pigeons$mass))
+)
+```
+
+--------------------------
+Create at trophic trait
+--------------------------
+```{r}
+trophic_pca = rda(pigeons[,c('beak_length', 'beak_width', 'beak_depth')])
+pigeons$trophic_pc1 = trophic_pca$Ybar[,1]
+pigeons$trophic_pc2 = trophic_pca$Ybar[,2]
+pigeons$trophic_pc3 = trophic_pca$Ybar[,3]
+summary(trophic_pca)
+```
+
+```{r}
+ggarrange(ncol = 4, nrow = 3,
+  ggplot(pigeons, aes(x = trophic_pc1, y = beak_length)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc1,pigeons$beak_length)),
+  ggplot(pigeons, aes(x = trophic_pc1, y = beak_width)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc1,pigeons$beak_width)),
+  ggplot(pigeons, aes(x = trophic_pc1, y = beak_depth)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc1,pigeons$beak_depth)),
+  ggplot(pigeons, aes(x = trophic_pc1, y = mass)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc1,pigeons$mass)),
+  ggplot(pigeons, aes(x = trophic_pc2, y = beak_length)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc2,pigeons$beak_length)),
+  ggplot(pigeons, aes(x = trophic_pc2, y = beak_width)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc2,pigeons$beak_width)),
+  ggplot(pigeons, aes(x = trophic_pc2, y = beak_depth)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc2,pigeons$beak_depth)),
+  ggplot(pigeons, aes(x = trophic_pc2, y = mass)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc2,pigeons$mass)),
+  ggplot(pigeons, aes(x = trophic_pc3, y = beak_length)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc3,pigeons$beak_length)),
+  ggplot(pigeons, aes(x = trophic_pc3, y = beak_width)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc3,pigeons$beak_width)),
+  ggplot(pigeons, aes(x = trophic_pc3, y = beak_depth)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc3,pigeons$beak_depth)),
+  ggplot(pigeons, aes(x = trophic_pc3, y = mass)) + geom_point() + labs(subtitle = cor(pigeons$trophic_pc3,pigeons$mass))
+)
+```
+
+----------------------------
+MNTD, picante
+----------------------------
+Need to use jetz for this
+
+the mntd function calculates the mean nearest taxon distance (MNTD), the mean distance separating each species in the community from its closest relative
+
+https://cran.r-project.org/web/packages/picante/vignettes/picante-intro.pdf
+
+```{r}
+mapping = read_csv('./bigquery_export__columbidae_taxonomic_mapping.csv')
+```
+
+```{r}
+col_loc_jetz_mapping = left_join(col_loc, mapping)
+regional_pool_data = distinct(col_loc_jetz_mapping[,c('city_name', 'jetz_scientific_name')])
+regional_pool_data$present_in_pool = T
+
+species_in_pools = pivot_wider(regional_pool_data, names_from = jetz_scientific_name, values_from = "present_in_pool", values_fill = list(present_in_pool = F))
+species_in_pools = tibble::column_to_rownames(species_in_pools, var='city_name')
+picante_pool_community = as.matrix(species_in_pools)
+```
+
+```{r}
+urban_data = distinct(col_loc_jetz_mapping[col_loc_jetz_mapping$present_in_city == T,c('city_name', 'jetz_scientific_name', 'present_in_city')])
+
+species_in_cities = pivot_wider(urban_data, names_from = jetz_scientific_name, values_from = "present_in_city", values_fill = list(present_in_city = F))
+species_in_cities = tibble::column_to_rownames(species_in_cities, var='city_name')
+picante_urban_community = as.matrix(species_in_cities)
+```
+
+```{r}
+urban_data_no_feral_pigeon = species_in_cities[species_in_cities$Columba_livia == F,]
+picante_urban_community_no_feral_pigeon = as.matrix(urban_data_no_feral_pigeon)
+```
+
+```{r}
+picante_urban_community_remove_feral_pigeon = as.matrix(species_in_cities[,-c(1)])
+```
+
+```{r}
+pigeons_jetz = left_join(pigeons, mapping)
+pigeons_jetz = pigeons_jetz %>% group_by(jetz_scientific_name) %>% summarise(locomotion = mean(loco_pc1), trophic = mean(trophic_pc1))
+picante_traits = pigeons_jetz[,c('jetz_scientific_name', 'locomotion', 'trophic')]
+picante_traits = tibble::column_to_rownames(picante_traits, var='jetz_scientific_name')
+picante_traits = as.matrix(picante_traits)
+```
+
+```{r}
+tree <- read.tree("./phylogeny__stage2_hackett_mcc_no_neg.tre")
+```
+
+```{r}
+tree_pruned_to_columbidae <- ladderize(drop.tip(tree, setdiff(tree$tip.label, rownames(picante_traits))))
+```
+
+```{r}
+phydist <- cophenetic(tree_pruned_to_columbidae)
+```
+
+```{r}
+par(mfrow=c(1,2))
+plot(tree_pruned_to_columbidae, show.tip.label=FALSE, main='locomotion')
+tiplabels(pch=22, col=picante_traits[,1], bg=picante_traits[,1], cex=1.5)
+
+plot(tree_pruned_to_columbidae, show.tip.label=FALSE, main='trophic')
+tiplabels(pch=22, col=picante_traits[,2], bg=picante_traits[,0], cex=1.5)
+```
+
+```{r}
+pool.mntd.result <- ses.mntd(picante_pool_community, phydist, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
+pool.mntd.result
+```
+
+```{r}
+city.mntd.result <- ses.mntd(picante_urban_community, phydist, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
+city.mntd.result
+```
+
+```{r}
+city_nfp.mntd.result <- ses.mntd(picante_urban_community_no_feral_pigeon, phydist, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
+city_nfp.mntd.result
+```
+
+```{r}
+city_rfp.mntd.result <- ses.mntd(picante_urban_community_remove_feral_pigeon, phydist, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
+city_rfp.mntd.result
+```
+
+```{r}
+pool.mntd.result$city_name = rownames(pool.mntd.result)
+pool.mntd.result$type = 'Regional Pool'
+
+city.mntd.result$city_name = rownames(city.mntd.result)
+city.mntd.result$type = 'Urban'
+
+city_nfp.mntd.result$city_name = rownames(city_nfp.mntd.result)
+city_nfp.mntd.result$type = 'Urban (No Feral Pigeon)'
+
+city_rfp.mntd.result$city_name = rownames(city_rfp.mntd.result)
+city_rfp.mntd.result$type = 'Urban (Feral Pigeon Removed)'
+
+rownames(pool.mntd.result) = NULL
+rownames(city.mntd.result) = NULL
+rownames(city_nfp.mntd.result) = NULL
+rownames(city_rfp.mntd.result) = NULL
+
+mntd.result = rbind(pool.mntd.result[!is.na(pool.mntd.result$mntd.obs), c('city_name', 'mntd.obs', 'type')], city.mntd.result[!is.na(city.mntd.result$mntd.obs), c('city_name', 'mntd.obs', 'type')])
+
+mntd_fp.result = rbind(city_nfp.mntd.result[!is.na(city_nfp.mntd.result$mntd.obs), c('city_name', 'mntd.obs', 'type')], city_rfp.mntd.result[!is.na(city_rfp.mntd.result$mntd.obs), c('city_name', 'mntd.obs', 'type')])
+
+head(mntd.result)
+```
+
+```{r}
+ggplot(mntd.result, aes(x = type, y = mntd.obs)) + geom_boxplot() + xlab('Community Type') + ylab('MNTD')
+```
+```{r}
+kruskal.test(mntd.result$mntd.obs~mntd.result$type)
+```
+
+# The mean nearest taxon distance is significantly lower in regional pools than in urban communities (chi-squard = 85.46, df = 1, p < 0.001)
+
+```{r}
+ggplot(rbind(mntd.result, mntd_fp.result), aes(x = type, y = mntd.obs)) + geom_boxplot() + xlab('Community Type') + ylab('MNTD')
+```
+
+```{r}
+mntd.all.result = rbind(mntd.result, mntd_fp.result)
+kruskal.test(mntd.all.result$mntd.obs~mntd.all.result$type)
+pairwise.wilcox.test(mntd.all.result$mntd.obs, mntd.all.result$type)
+```

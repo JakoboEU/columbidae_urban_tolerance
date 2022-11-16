@@ -120,18 +120,18 @@ ggplot() +
 
 How do traits occur within these clusters given urban tolerance?
 ```{r}
-avenet_birdlife = read_csv('./avenet_birdlife.csv')
-head(avenet_birdlife)
+avonet_birdlife = read_csv('./avonet_birdlife')
+head(avonet_birdlife)
 ```
 ```{r}
 mapping = read_csv('./bigquery_export__columbidae_taxonomic_mapping.csv')
 ```
 
 ```{r}
-avenet_mapping = left_join(mapping, avenet_birdlife, by = c('species_name' = 'Species1'))
-avenet_jetz_dups = avenet_mapping[, c('jetz_scientific_name', 'Beak.Length_Culmen', 'Beak.Length_Nares', 'Beak.Width', 'Beak.Depth', 'Tarsus.Length', 'Wing.Length', 'Kipps.Distance', 'Secondary1', 'Hand-Wing.Index', 'Tail.Length', 'Habitat.Density', 'Trophic.Niche', 'Primary.Lifestyle')]
+avonet_mapping = left_join(mapping, avonet_birdlife, by = c('species_name' = 'Species1'))
+avonet_jetz_dups = avonet_mapping[, c('jetz_scientific_name', 'Beak.Length_Culmen', 'Beak.Length_Nares', 'Beak.Width', 'Beak.Depth', 'Tarsus.Length', 'Wing.Length', 'Kipps.Distance', 'Secondary1', 'Hand-Wing.Index', 'Tail.Length', 'Habitat.Density', 'Trophic.Niche', 'Primary.Lifestyle')]
 
-avenet_jetz = avenet_jetz_dups %>% group_by(jetz_scientific_name) %>% summarise(
+avonet_jetz = avonet_jetz_dups %>% group_by(jetz_scientific_name) %>% summarise(
   beak_length_culmen = mean(Beak.Length_Culmen),
   beak_length_nares = mean(Beak.Length_Nares),
   beak_width = mean(Beak.Width),
@@ -143,10 +143,10 @@ avenet_jetz = avenet_jetz_dups %>% group_by(jetz_scientific_name) %>% summarise(
   hand_wing_index = mean(`Hand-Wing.Index`),
   tail_length = mean(Tail.Length)
 )
-avenet_jetz
+avonet_jetz
 ```
 ```{r}
-col_traits_ut = left_join(clustered_species_ut, avenet_jetz)
+col_traits_ut = left_join(clustered_species_ut, avonet_jetz)
 col_traits_ut
 ```
 

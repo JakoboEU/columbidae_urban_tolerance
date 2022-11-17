@@ -367,7 +367,7 @@ community_change_df
 ```
 
 ```{r}
-t.test(community_change_df$pool, community_change_df$city, paired = TRUE, alternative = "two.sided")
+wilcox.test(community_change_df$pool, community_change_df$city, paired = TRUE)
 ```
 
 ```{r}
@@ -375,5 +375,5 @@ community_change_df$id - row_number(community_change_df$city)
 community_change_df_l = pivot_longer(community_change_df, names_to = 'type', values_to = 'value', cols = c('pool', 'city'))
 community_change_df_l$type = factor(community_change_df_l$type, levels = c('pool', 'city'), labels = c('Regional Pool', 'Urban'))
 
-ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Urban and Regional Communities", subtitle = "t = -16.133, df = 742, p-value < 2.2e-16")
+ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Urban and Regional Communities", subtitle = "Wilcoxon signed rank (V = 27046, p-value < 2.2e-16)")
 ```

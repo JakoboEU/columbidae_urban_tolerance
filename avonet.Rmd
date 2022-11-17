@@ -10,12 +10,9 @@ library(factoextra)
 library(densityClust)
 library(stats)
 library(sf)
-library(dplyr)
-library(tidyverse)
 library(ggpubr)
 library(grid)
 library(vegan)
-library(GGally)
 library(phytools)
 library(picante)
 rm(list = ls())
@@ -137,6 +134,8 @@ annotate_figure(figure3, left = textGrob("Urban tolerance", rot = 90, vjust = 1,
 kruskal.test(pigeons$urban_tolerance~pigeons$habitat_density)
 pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$habitat_density)
 ```
+
+
 ----------------------------
 Lifestyle
 ----------------------------
@@ -235,22 +234,24 @@ mapping = read_csv('./bigquery_export__columbidae_taxonomic_mapping.csv')
 ```
 
 ```{r}
-col_loc_jetz_mapping = left_join(col_loc, mapping)
-regional_pool_data = distinct(col_loc_jetz_mapping[,c('city_name', 'jetz_scientific_name')])
-regional_pool_data$present_in_pool = T
-
-species_in_pools = pivot_wider(regional_pool_data, names_from = jetz_scientific_name, values_from = "present_in_pool", values_fill = list(present_in_pool = F))
-species_in_pools = tibble::column_to_rownames(species_in_pools, var='city_name')
-picante_pool_community = as.matrix(species_in_pools)
-```
-
-```{r}
 urban_data = distinct(col_loc_jetz_mapping[col_loc_jetz_mapping$present_in_city == T,c('city_name', 'jetz_scientific_name', 'present_in_city')])
 
 species_in_cities = pivot_wider(urban_data, names_from = jetz_scientific_name, values_from = "present_in_city", values_fill = list(present_in_city = F))
 species_in_cities = tibble::column_to_rownames(species_in_cities, var='city_name')
 picante_urban_community = as.matrix(species_in_cities)
 ```
+
+```{r}
+col_loc_jetz_mapping = left_join(col_loc, mapping)
+regional_pool_data = distinct(col_loc_jetz_mapping[,c('city_name', 'jetz_scientific_name')])
+regional_pool_data$present_in_pool = T
+
+species_in_pools = pivot_wider(regional_pool_data[regional_pool_data$city_name %in% urban_data$city_name,], names_from = jetz_scientific_name, values_from = "present_in_pool", values_fill = list(present_in_pool = F))
+species_in_pools = tibble::column_to_rownames(species_in_pools, var='city_name')
+picante_pool_community = as.matrix(species_in_pools)
+```
+
+
 
 ```{r}
 urban_data_no_feral_pigeon = species_in_cities[species_in_cities$Columba_livia == F,]
@@ -352,4 +353,27 @@ ggplot(rbind(mntd.result, mntd_fp.result), aes(x = type, y = mntd.obs)) + geom_b
 mntd.all.result = rbind(mntd.result, mntd_fp.result)
 kruskal.test(mntd.all.result$mntd.obs~mntd.all.result$type)
 pairwise.wilcox.test(mntd.all.result$mntd.obs, mntd.all.result$type)
+```
+
+Maybe a two-sided t-test is a better test?
+------------------------------------------
+```{r}
+community_change_df = data.frame(
+  city = city.mntd.result$mntd.obs,
+  pool = pool.mntd.result$mntd.obs
+)
+community_change_df = community_change_df[!is.na(community_change_df$city),]
+community_change_df
+```
+
+```{r}
+t.test(community_change_df$pool, community_change_df$city, paired = TRUE, alternative = "two.sided")
+```
+
+```{r}
+community_change_df$id - row_number(community_change_df$city)
+community_change_df_l = pivot_longer(community_change_df, names_to = 'type', values_to = 'value', cols = c('pool', 'city'))
+community_change_df_l$type = factor(community_change_df_l$type, levels = c('pool', 'city'), labels = c('Regional Pool', 'Urban'))
+
+ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Urban and Regional Communities", subtitle = "t = -16.133, df = 742, p-value < 2.2e-16")
 ```

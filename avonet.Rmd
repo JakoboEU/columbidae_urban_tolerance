@@ -376,3 +376,38 @@ community_change_df_l$type = factor(community_change_df_l$type, levels = c('pool
 
 ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Regional and Urban Communities", subtitle = "Wilcoxon signed rank (V = 27046, p-value < 2.2e-16)")
 ```
+```{r}
+world_distributions <- read_sf('./urban_centres/urban_centres.shp')
+world_cities <- distinct(world_distributions[,c('fid', 'geometry')])
+names(world_cities) <- c('city_id', 'geometry')
+```
+
+```{r}
+community_change_df$city_id = as.integer(community_change_df$id)
+community_change_df$mntd_increase = ((community_change_df$city / community_change_df$pool) - 1) * 100
+world_cities_mntd = left_join(community_change_df, world_cities)
+world_cities_mntd = st_sf(world_cities_mntd)
+world_cities_mntd
+```
+
+```{r}
+country_outlines <- read_sf('./world_country_outlines/world-administrative-boundaries.shp')
+world_cities <- st_transform(world_cities, crs = st_crs(country_outlines))
+```
+
+```{r, fig.width = 8}
+library(scales)
+ggplot() +  
+  geom_sf(data = country_outlines, aes(geometry = geometry)) +
+  geom_sf(data = world_cities_mntd, aes(geometry = geometry, color = mntd_increase), show.legend = "point") +
+  theme_bw() + theme(legend.position="bottom") + scale_colour_gradient2(
+  low = muted("red"),
+  mid = "yellow",
+  high = "darkgreen",
+  midpoint = 0,
+  space = "Lab",
+  na.value = "grey50",
+  guide = "colourbar",
+  aesthetics = "colour"
+) + guides(color=guide_legend(title="% Increase in MNTD in urban communities compared to regional communities"))
+```

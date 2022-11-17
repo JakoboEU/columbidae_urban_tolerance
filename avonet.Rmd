@@ -234,24 +234,23 @@ mapping = read_csv('./bigquery_export__columbidae_taxonomic_mapping.csv')
 ```
 
 ```{r}
-urban_data = distinct(col_loc_jetz_mapping[col_loc_jetz_mapping$present_in_city == T,c('city_name', 'jetz_scientific_name', 'present_in_city')])
+col_loc_jetz_mapping = left_join(col_loc, mapping)
+urban_data = distinct(col_loc_jetz_mapping[col_loc_jetz_mapping$present_in_city == T,c('city_id', 'jetz_scientific_name', 'present_in_city')])
 
 species_in_cities = pivot_wider(urban_data, names_from = jetz_scientific_name, values_from = "present_in_city", values_fill = list(present_in_city = F))
-species_in_cities = tibble::column_to_rownames(species_in_cities, var='city_name')
+species_in_cities = tibble::column_to_rownames(species_in_cities, var='city_id')
 picante_urban_community = as.matrix(species_in_cities)
+species_in_cities
 ```
 
 ```{r}
-col_loc_jetz_mapping = left_join(col_loc, mapping)
-regional_pool_data = distinct(col_loc_jetz_mapping[,c('city_name', 'jetz_scientific_name')])
+regional_pool_data = distinct(col_loc_jetz_mapping[,c('city_id', 'jetz_scientific_name')])
 regional_pool_data$present_in_pool = T
 
-species_in_pools = pivot_wider(regional_pool_data[regional_pool_data$city_name %in% urban_data$city_name,], names_from = jetz_scientific_name, values_from = "present_in_pool", values_fill = list(present_in_pool = F))
-species_in_pools = tibble::column_to_rownames(species_in_pools, var='city_name')
+species_in_pools = pivot_wider(regional_pool_data[regional_pool_data$city_id %in% urban_data$city_id,], names_from = jetz_scientific_name, values_from = "present_in_pool", values_fill = list(present_in_pool = F))
+species_in_pools = tibble::column_to_rownames(species_in_pools, var='city_id')
 picante_pool_community = as.matrix(species_in_pools)
 ```
-
-
 
 ```{r}
 urban_data_no_feral_pigeon = species_in_cities[species_in_cities$Columba_livia == F,]
@@ -360,7 +359,8 @@ Maybe a two-sided t-test is a better test?
 ```{r}
 community_change_df = data.frame(
   city = city.mntd.result$mntd.obs,
-  pool = pool.mntd.result$mntd.obs
+  pool = pool.mntd.result$mntd.obs,
+  id = rownames(species_in_cities)
 )
 community_change_df = community_change_df[!is.na(community_change_df$city),]
 community_change_df
@@ -371,7 +371,6 @@ wilcox.test(community_change_df$pool, community_change_df$city, paired = TRUE)
 ```
 
 ```{r}
-community_change_df$id - row_number(community_change_df$city)
 community_change_df_l = pivot_longer(community_change_df, names_to = 'type', values_to = 'value', cols = c('pool', 'city'))
 community_change_df_l$type = factor(community_change_df_l$type, levels = c('pool', 'city'), labels = c('Regional Pool', 'Urban'))
 

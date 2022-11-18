@@ -411,3 +411,23 @@ ggplot() +
   aesthetics = "colour"
 ) + guides(color=guide_legend(title="% Increase in MNTD in urban communities compared to regional communities"))
 ```
+
+```{r}
+world_cities_mntd$abs_latitude = abs(st_coordinates(world_cities_mntd)[,2])
+model_mntd_by_latitude = glm(data = world_cities_mntd, formula = mntd_increase ~ abs_latitude)
+summary(model_mntd_by_latitude)
+```
+
+R-squared:
+```{r}
+with(summary(model_mntd_by_latitude), 1 - deviance/null.deviance)
+```
+
+```{r}
+ggplot(world_cities_mntd, aes(x = mntd_increase, y = abs_latitude)) +
+  geom_point() +
+  geom_smooth(method = "glm") + 
+  xlab("% Increase in MNTD") + ylab("Absolute latitude") + 
+  labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p = 0.00013, R2 = 0.02")
+```
+

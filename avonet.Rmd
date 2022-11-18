@@ -374,7 +374,8 @@ wilcox.test(community_change_df$pool, community_change_df$city, paired = TRUE)
 community_change_df_l = pivot_longer(community_change_df, names_to = 'type', values_to = 'value', cols = c('pool', 'city'))
 community_change_df_l$type = factor(community_change_df_l$type, levels = c('pool', 'city'), labels = c('Regional Pool', 'Urban'))
 
-ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Regional and Urban Communities", subtitle = "Wilcoxon signed rank (V = 27046, p-value < 2.2e-16)")
+gg_mntd_change = ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Regional and Urban Communities", subtitle = "Wilcoxon signed rank (V = 27046, p-value < 2.2e-16)")
+gg_mntd_change
 ```
 ```{r}
 world_distributions <- read_sf('./urban_centres/urban_centres.shp')
@@ -397,7 +398,7 @@ world_cities <- st_transform(world_cities, crs = st_crs(country_outlines))
 
 ```{r, fig.width = 8}
 library(scales)
-ggplot() +  
+gg_mntd_world = ggplot() +  
   geom_sf(data = country_outlines, aes(geometry = geometry)) +
   geom_sf(data = world_cities_mntd, aes(geometry = geometry, color = mntd_increase), show.legend = "point") +
   theme_bw() + theme(legend.position="bottom") + scale_colour_gradient2(
@@ -410,6 +411,7 @@ ggplot() +
   guide = "colourbar",
   aesthetics = "colour"
 ) + guides(color=guide_legend(title="% Increase in MNTD in urban communities compared to regional communities"))
+gg_mntd_world
 ```
 
 ```{r}
@@ -424,10 +426,24 @@ with(summary(model_mntd_by_latitude), 1 - deviance/null.deviance)
 ```
 
 ```{r}
-ggplot(world_cities_mntd, aes(x = mntd_increase, y = abs_latitude)) +
+gg_mntd_by_latitude = ggplot(world_cities_mntd, aes(x = mntd_increase, y = abs_latitude)) +
   geom_point() +
   geom_smooth(method = "glm") + 
   xlab("% Increase in MNTD") + ylab("Absolute latitude") + 
   labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p = 0.00013, R2 = 0.02")
+gg_mntd_by_latitude
 ```
+
+```{r, fig.height=8,fig.width=8}
+library(grid)
+library(gridExtra)
+grid.arrange(gg_mntd_by_latitude, gg_mntd_world, gg_mntd_change,
+  widths = c(2, 1), heights = c(3, 4),
+  layout_matrix = rbind(c(1, NA),
+                        c(3, 4))
+)
+```
+
+
+
 

@@ -375,29 +375,82 @@ paired_presence
 ```{r}
 paired_presence[paired_presence$city_id == 1786,]
 ```
-
 ```{r}
 paired_presence[paired_presence$species == 'Columba_oenas' & paired_presence$alternative_species == 'Columba_palumbus',]
 ```
 
 ```{r}
-species_pool_cooccurance_pt1 = paired_presence %>% 
+species_pool_genetically_close_cooccurance_pt1 = paired_presence %>% 
   filter(genetically_close) %>% 
   group_by(species, alternative_species) %>% 
   summarise(total_cities_paired = n(), cooccur = sum(status == 'COOCCUR'), replaced = sum(status == 'REPLACED'), held = sum(status == 'HELD'))
 
-species_pool_cooccurance = left_join(species_pool_cooccurance_pt1, col_jetz_ut[,c('jetz_scientific_name', 'region_count', 'city_count', 'urban_tolerance')], by = c('species' = 'jetz_scientific_name'))
+species_pool_genetically_close_cooccurance = left_join(species_pool_genetically_close_cooccurance_pt1, col_jetz_ut[,c('jetz_scientific_name', 'region_count', 'city_count', 'urban_tolerance')], by = c('species' = 'jetz_scientific_name'))
 ```
 
 ```{r}
-species_pool_cooccurance[species_pool_cooccurance$species == 'Columba_oenas',]
+species_pool_genetically_close_cooccurance[species_pool_genetically_close_cooccurance$species == 'Columba_oenas',]
 ```
 
 ```{r}
-species_pool_cooccurance[species_pool_cooccurance$replaced > 0 & species_pool_cooccurance$held > 0,]
+species_pool_genetically_close_cooccurance[species_pool_genetically_close_cooccurance$replaced > 0 & species_pool_genetically_close_cooccurance$held > 0,]
+```
+
+```{r}
+species_pool_genetically_close_cooccurance$held_ratio = species_pool_cooccurance$held / species_pool_cooccurance$total_cities_paired
+species_genetically_close_by_held_ratio = species_pool_genetically_close_cooccurance %>% filter(total_cities_paired > 5) %>% group_by(species, urban_tolerance) %>% summarise(average_held = mean(held_ratio))
+ggplot(species_genetically_close_by_held_ratio, aes(x = average_held, y = urban_tolerance)) + geom_point() + geom_smooth(method="glm") + labs(subtitle = paste("Correlation", cor(species_genetically_close_by_held_ratio$average_held, species_genetically_close_by_held_ratio$urban_tolerance)))
 ```
 ```{r}
-species_pool_cooccurance$held_ratio = species_pool_cooccurance$held / species_pool_cooccurance$total_cities_paired
-species_by_held_ratio = species_pool_cooccurance %>% filter(total_cities_paired > 5) %>% group_by(species, urban_tolerance) %>% summarise(average_held = mean(held_ratio))
-ggplot(species_by_held_ratio, aes(x = average_held, y = urban_tolerance)) + geom_point() + geom_smooth(method="glm") + labs(subtitle = paste("Correlation", cor(species_by_held_ratio$average_held, species_by_held_ratio$urban_tolerance)))
+avonet_birdlife <- read_csv('./avonet_birdlife.csv')
+avonet_jetz_pt1 <- left_join(avonet_birdlife, mapping, by = c('Species1' = 'species_name'))
+
+avonet_jetz <- distinct(avonet_jetz_pt1[!is.na(avonet_jetz_pt1$jetz_scientific_name),c('jetz_scientific_name', 'Primary.Lifestyle', 'Trophic.Niche', 'Trophic.Level', 'Habitat', 'Habitat.Density')])
+
+#duplicates?
+avonet_jetz %>% group_by(jetz_scientific_name) %>% summarize(n = n()) %>% filter(n > 1)
 ```
+
+```{r}
+paired_presence_with_traits_pt1 = left_join(paired_presence, avonet_jetz, by = c('species' = 'jetz_scientific_name'))
+paired_presence_with_traits = left_join(paired_presence_with_traits_pt1, avonet_jetz, suffix = c('', '.Alternative'), by = c('alternative_species' = 'jetz_scientific_name'))
+
+paired_presence_shared_traits = paired_presence_with_traits[
+  paired_presence_with_traits_pt2$Primary.Lifestyle == paired_presence_with_traits_pt2$Primary.Lifestyle.Alternative &
+    paired_presence_with_traits_pt2$Trophic.Level == paired_presence_with_traits_pt2$Trophic.Level.Alternative &
+    paired_presence_with_traits_pt2$Trophic.Niche == paired_presence_with_traits_pt2$Trophic.Niche.Alternative &
+    paired_presence_with_traits_pt2$Habitat == paired_presence_with_traits_pt2$Habitat.Alternative &
+    paired_presence_with_traits_pt2$Habitat.Density == paired_presence_with_traits_pt2$Habitat.Density.Alternative
+,]
+paired_presence_shared_traits
+```
+
+```{r}
+table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Primary.Lifestyle)
+```
+
+```{r}
+table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Trophic.Niche)
+```
+
+```{r}
+table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat.Density)
+```
+
+```{r}
+table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat)
+```
+
+```{r}
+table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$genetically_close)
+```
+
+```{r}
+ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Terrestrial',], aes(x = cooccur, y = mntd)) + geom_boxplot()
+```
+```{r}
+ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore',], aes(x = cooccur, y = mntd)) + geom_boxplot()
+```
+
+
+

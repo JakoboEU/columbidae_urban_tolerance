@@ -288,6 +288,26 @@ mntd.species_removal
 ```
 
 ```{r}
+mntd_to_presence = left_join(urban_data_jetz, mntd.species_removal, by = c('city_id' = 'city_id', 'jetz_scientific_name' = 'species_missing'))
+
+presence_explained_by_mntd_increase = glm(data = mntd_to_presence[!is.na(mntd_to_presence$mntd_increase),], formula = present_in_city ~ mntd_increase, family = "binomial")
+summary(presence_explained_by_mntd_increase)
+```
+
+```{r}
+with(summary(presence_explained_by_mntd_increase), 1 - deviance/null.deviance)
+```
+
+******************************************************************************************************
+* Presence in city is significantly explained by the percentage increase in regional pool 
+* MNTD when the species is removed from the regional pool (estimate = 0.008, p < 0.001, R2 = 0.003).
+******************************************************************************************************
+```{r}
+ggplot(mntd_to_presence, aes(x = present_in_city, y = mntd_increase)) + geom_boxplot() + xlab("Present in city?") + ylab("% increase in MNTD")
+```
+
+
+```{r}
 col_jetz_ut = urban_data_jetz %>% group_by(jetz_scientific_name) %>% summarise(region_count = n(), city_count = sum(present_in_city), urban_tolerance = sum(present_in_city)/n())
 col_jetz_ut
 ```
@@ -397,7 +417,7 @@ species_pool_genetically_close_cooccurance[species_pool_genetically_close_cooccu
 ```
 
 ```{r}
-species_pool_genetically_close_cooccurance$held_ratio = species_pool_cooccurance$held / species_pool_cooccurance$total_cities_paired
+species_pool_genetically_close_cooccurance$held_ratio = species_pool_genetically_close_cooccurance$held / species_pool_genetically_close_cooccurance$total_cities_paired
 species_genetically_close_by_held_ratio = species_pool_genetically_close_cooccurance %>% filter(total_cities_paired > 5) %>% group_by(species, urban_tolerance) %>% summarise(average_held = mean(held_ratio))
 ggplot(species_genetically_close_by_held_ratio, aes(x = average_held, y = urban_tolerance)) + geom_point() + geom_smooth(method="glm") + labs(subtitle = paste("Correlation", cor(species_genetically_close_by_held_ratio$average_held, species_genetically_close_by_held_ratio$urban_tolerance)))
 ```
@@ -413,9 +433,9 @@ avonet_jetz %>% group_by(jetz_scientific_name) %>% summarize(n = n()) %>% filter
 
 ```{r}
 paired_presence_with_traits_pt1 = left_join(paired_presence, avonet_jetz, by = c('species' = 'jetz_scientific_name'))
-paired_presence_with_traits = left_join(paired_presence_with_traits_pt1, avonet_jetz, suffix = c('', '.Alternative'), by = c('alternative_species' = 'jetz_scientific_name'))
+paired_presence_with_traits_pt2 = left_join(paired_presence_with_traits_pt1, avonet_jetz, suffix = c('', '.Alternative'), by = c('alternative_species' = 'jetz_scientific_name'))
 
-paired_presence_shared_traits = paired_presence_with_traits[
+paired_presence_shared_traits = paired_presence_with_traits_pt2[
   paired_presence_with_traits_pt2$Primary.Lifestyle == paired_presence_with_traits_pt2$Primary.Lifestyle.Alternative &
     paired_presence_with_traits_pt2$Trophic.Level == paired_presence_with_traits_pt2$Trophic.Level.Alternative &
     paired_presence_with_traits_pt2$Trophic.Niche == paired_presence_with_traits_pt2$Trophic.Niche.Alternative &
@@ -477,4 +497,75 @@ ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche
 ```
 
 
+What about city presence model?
+-------------------------------
+```{r}
+model_summary <- function(model_sum) {
+  .column_name <- function(postfix) {
+    postfix
+  }
+  
+  # just return the estimate and p value
+  weight <- model_sum$msTable[, 5L]
+  
+  coefmat.full <- as.data.frame(.makecoefmat(.coefarr.avg(model_sum$coefArray, weight,
+                                                          attr(model_sum, "revised.var"), TRUE, 0.05)))
+  
+  coefmat.subset <-
+    as.data.frame(.makecoefmat(.coefarr.avg(model_sum$coefArray, weight,
+                                            attr(model_sum, "revised.var"), FALSE, 0.05)))
+  
+  
+  coefmat.subset <- coefmat.subset[-c(1), c(1, 2, 5)]
+  names(coefmat.subset) <- c(.column_name("estimate"), .column_name("error"), .column_name("p"))
+  coefmat.subset <- tibble::rownames_to_column(coefmat.subset, "explanatory")
+  coefmat.subset$model = 'subset'
+  
+  coefmat.full <- coefmat.full[-c(1), c(1, 2, 5)]
+  names(coefmat.full) <- c(.column_name("estimate"), .column_name("error"), .column_name("p"))
+  coefmat.full <- tibble::rownames_to_column(coefmat.full, "explanatory")
+  coefmat.full$model = 'full'
+  
+  rbind(coefmat.full, coefmat.subset)
+}
+```
 
+```{r}
+library(MuMIn)
+options(na.action = "na.fail") 
+
+mntd_and_traits = left_join(mntd_to_presence[!is.na(mntd_to_presence$mntd_increase),], avonet_jetz, by = c('jetz_scientific_name' = 'jetz_scientific_name'))
+mntd_and_traits = mntd_and_traits[!is.na(mntd_and_traits$Habitat),]
+
+mntd_and_traits$Habitat = factor(mntd_and_traits$Habitat)
+mntd_and_traits$Habitat = relevel(mntd_and_traits$Habitat, 'Human Modified')
+
+mntd_and_traits$Primary.Lifestyle = factor(mntd_and_traits$Primary.Lifestyle)
+
+mntd_and_traits$Trophic.Niche = factor(mntd_and_traits$Trophic.Niche)
+mntd_and_traits$Trophic.Niche = relevel(mntd_and_traits$Trophic.Niche, 'Omnivore')
+
+mntd_and_traits$Habitat.Density = factor(mntd_and_traits$Habitat.Density)
+mntd_and_traits$Habitat.Density = relevel(mntd_and_traits$Habitat.Density, '2')
+
+model_traits = glm(data = mntd_and_traits, formula = present_in_city ~ mntd_increase + Primary.Lifestyle +Trophic.Niche  + Habitat + Habitat.Density)
+
+dredge_result <- dredge(model_traits)
+summary_result = summary(model.avg(dredge_result))
+presence_explanatories = model_summary(summary_result)
+presence_explanatories
+```
+
+
+```{r}
+ggplot(presence_explanatories[presence_explanatories$model == 'full',], aes(y=explanatory, x=estimate)) + 
+  geom_line() +
+  geom_point()+
+  geom_errorbar(aes(xmin=estimate-error, xmax=estimate+error), width=.2,
+                 position=position_dodge(0.05)) +
+  theme_bw() +
+  geom_vline(xintercept=0, linetype="dotted") +
+  guides(colour=guide_legend(title="Predictor type")) + xlab('Present in pool?') + ylab('Predictor') +
+  theme(legend.justification = "top")
+
+```

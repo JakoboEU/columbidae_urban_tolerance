@@ -256,3 +256,29 @@ tiplabels(pch=22, col=picante_traits[,1], bg=picante_traits[,1], cex=1.5)
 plot(tree_pruned_to_columbidae, show.tip.label=FALSE, main='trophic')
 tiplabels(pch=22, col=picante_traits[,2], bg=picante_traits[,0], cex=1.5)
 ```
+```{R}
+ggplot(pigeons, aes(x = loco_pc1, y = trophic_pc1, color = urban_tolerance)) + geom_point() + scale_color_gradientn(colours = terrain.colors(7))
+```
+
+```{r}
+ggplot(pigeons, aes(x = loco_pc1, y = trophic_pc1, color = trophic_niche)) + geom_point()
+```
+```{r}
+summary(glm(data = pigeons, formula = as.factor(trophic_niche) ~ loco_pc1 * trophic_pc1, family = binomial))
+```
+
+```{r}
+ggplot(pigeons, aes(x = loco_pc1, y = trophic_pc1, color = primary_lifestyle)) + geom_point()
+```
+
+```{r}
+summary(glm(data = pigeons[pigeons$primary_lifestyle != 'Generalist',], formula = as.factor(primary_lifestyle) ~ loco_pc1 * trophic_pc1, family = binomial))
+```
+
+```{r}
+ggplot(pigeons, aes(x = loco_pc1, y = trophic_pc1, color = habitat)) + geom_point()
+```
+
+```{r}
+summary(glm(data = pigeons, formula = as.factor(habitat) ~ loco_pc1 * trophic_pc1, family = binomial))
+```

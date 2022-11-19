@@ -424,32 +424,56 @@ paired_presence_shared_traits = paired_presence_with_traits[
 ,]
 paired_presence_shared_traits
 ```
+```{r}
+library(corrplot)
+```
 
 ```{r}
 table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Primary.Lifestyle)
+chisq.lifestyle = chisq.test(table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Primary.Lifestyle))
+summary(chisq.lifestyle)
+round(chisq.lifestyle$residuals, 2)
+corrplot(chisq.lifestyle$residuals, is.cor = FALSE)
 ```
 
 ```{r}
 table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Trophic.Niche)
+chisq.trophic = chisq.test(table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Trophic.Niche))
+summary(chisq.trophic)
+round(chisq.trophic$residuals, 2)
+corrplot(chisq.trophic$residuals, is.cor = FALSE)
 ```
 
 ```{r}
 table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat.Density)
+chisq.habitat.density = chisq.test(table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat.Density))
+summary(chisq.habitat.density)
+round(chisq.habitat.density$residuals, 2)
+corrplot(chisq.habitat.density$residuals, is.cor = FALSE)
 ```
 
 ```{r}
 table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat)
+chisq.habitat = chisq.test(table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat))
+summary(chisq.habitat)
+round(chisq.habitat$residuals, 2)
+corrplot(chisq.habitat$residuals, is.cor = FALSE)
 ```
+
 
 ```{r}
 table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$genetically_close)
+chisq.generically_close = chisq.test(table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$genetically_close))
+summary(chisq.generically_close)
+corrplot(chisq.generically_close$residuals, is.cor = FALSE)
 ```
 
 ```{r}
-ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Terrestrial',], aes(x = cooccur, y = mntd)) + geom_boxplot()
+ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Terrestrial',], aes(x = cooccur, y = mntd)) + geom_boxplot() + xlab("Cooccuring pairs?") + ylab("Paired MNTD") + labs(title = "Terrestrial Species")
 ```
+
 ```{r}
-ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore',], aes(x = cooccur, y = mntd)) + geom_boxplot()
+ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore',], aes(x = cooccur, y = mntd)) + geom_boxplot() + xlab("Cooccuring pairs?") + ylab("Paired MNTD")+ labs(title = "Frugivore Species")
 ```
 
 

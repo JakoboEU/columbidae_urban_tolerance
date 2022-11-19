@@ -444,6 +444,24 @@ paired_presence_shared_traits = paired_presence_with_traits_pt2[
 ,]
 paired_presence_shared_traits
 ```
+All species pairs
+```{r}
+kruskal.test(paired_presence_with_traits_pt2$mntd~paired_presence_with_traits_pt2$cooccur)
+```
+```{R}
+ggplot(paired_presence_with_traits_pt2, aes(x = cooccur, y = mntd)) + geom_boxplot() + labs(title = "Paired species", subtitle = "All species pairs")
+```
+
+Species paired by lifestyle, habitat, and trophic niche:
+```{r}
+kruskal.test(paired_presence_shared_traits$mntd~paired_presence_shared_traits$cooccur)
+```
+
+```{R}
+ggplot(paired_presence_shared_traits, aes(x = cooccur, y = mntd)) + geom_boxplot() + labs(title = "Paired species", subtitle = "Species sharing lifestyle, habitat, and trophic niche")
+```
+# Species are more likely to cooccur if they are phylogentically further apart (Chi-squared=21.629, df=1, p<0.001).
+
 ```{r}
 library(corrplot)
 ```

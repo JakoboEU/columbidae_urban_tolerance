@@ -3,6 +3,18 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+> We analyzed each derived trait axis individually using met- rics we term either multipattern, single-niche axis, because they test for both assembly patterns (clustering and ov- erdispersion), or single-pattern, single-niche axis, because they test for only one assembly pattern. We focused on three multipattern, single-niche–axis metrics: (1) FD ap- plied to a single trait axis, (2) variance (the variance in species values within a community along a single trait axis), and (3) range (the range in species trait values within a community, i.e., the single-niche-axis equivalent of CHV).
+> Both variance and range have previously been used predominantly as a measure of trait clustering (e.g., Stubbs and Wilson 2004; Kraft and Ackerly 2010). 
+> We also focused on one single-pattern, single-niche–axis metric, SDNDr, the standard deviation of the distances between neigh- boring species along a single trait axis, divided by the trait range of the community. The metric SDNDr is used to detect only the regular spacing in species trait values pre- dicted by competitive exclusion (Kraft and Ackerly 2010)
+> --- Triso et al. (2014)
+
+
+> We sampled multiple specimens for all species recorded in our study, taking seven measurements from each specimen: bill length, width, and depth, wing length, length of primary projection, tarsus length and tail length. We then used these measurements to generate four categories of functionaltrait: overall body size, trophic traits, locomotory traits,and dispersal traits. Specifically, following Trisos et al. (2014), we used a two-step principal component analysis (PCA) on averaged morphological traits related to different ecological characteristics. Initially, PCAs were separately undertaken on locomotory (tail, wing, and tarsus length) and trophic (beak length, width, and epth) traits.
+> The second components of the locomotory (short tarsus : long tail/wing) and trophic (short beak : wide/deep beak) PCAs were used as the respective trait axes. The first components of each of these PCAs were strongly related to size, so we combined them in a second PCA to form an axis of overall body size. 
+> The dispersal trait was the final axis and consisted of the log- transformed hand-wing index (Claramunt et al. 2012; also see Appendix B)
+> We adopted this two-step approach because it accounts for correlation between traits, particularly the correlation of all traits with body size, and thus outperforms standard ordination technique
+> --- Bergman et al. (2015)
+
 ```{r setup}
 library(dplyr)
 library(tidyverse)
@@ -33,18 +45,17 @@ avonet_birdlife = read_csv('./avonet_birdlife.csv')
 head(avonet_birdlife)
 ```
 
-Check we have traits for all species in our dataset
+### Check we have traits for all species in our dataset
 ```{r}
 distinct(col_loc[!col_loc$species_name %in% avonet_birdlife$Species1,])
 distinct(col_ut[!col_ut$species_name %in% avonet_birdlife$Species1,])
 ```
 
 
-
-Bregman et al. (2015): https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/14-1731.1
-Trisos et al. (2014)
-locomotory (tail, wing, and tarsus length) 
-trophic (beak length, width, and depth) traits
+> locomotory (tail, wing, and tarsus length) 
+> trophic (beak length, width, and depth) traits
+> --- Bregman et al. (2015): https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/14-1731.1
+> --- Trisos et al. (2014)
 
 ```{r}
 col_traits = avonet_birdlife[avonet_birdlife$Species1 %in% col_loc$species_name,c('Species1', 'Beak.Length_Culmen', 'Beak.Width', 'Beak.Depth', 'Tail.Length', 'Hand-Wing.Index', 'Tarsus.Length', 'Habitat', 'Habitat.Density', 'Trophic.Niche', 'Primary.Lifestyle', 'Range.Size', 'Mass')]
@@ -65,9 +76,7 @@ pigeons5 = pigeons[pigeons$region_count >= 5,]
 shapiro.test(pigeons$urban_tolerance) #p <= 0.05   -> Significantly different from normal
 ```
 
-----------------------------
-Trophic niches
-----------------------------
+# Compare Trophic niches
 ```{r}
 figure1 = ggarrange(ncol = 2, nrow = 1,
   ggplot(pigeons, aes(x = trophic_niche, y = urban_tolerance)) + 
@@ -84,17 +93,19 @@ kruskal.test(pigeons$urban_tolerance~pigeons$trophic_niche)
 pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$trophic_niche)
 ```
 
-# Urban tolerance was significantly different between different trophic niches (Chi-squared=19.31, df=2, p<0.001), with urban tolerance significantly 
-# lower in Frugivores compared to Granivores.
+```
+-
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=19.31, df=2, p<0.001), with urban tolerance significantly 
+- lower in Frugivores compared to Granivores.
+-
+```
 
 ```{r}
 kruskal.test(pigeons5$urban_tolerance~pigeons5$trophic_niche)
 pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$trophic_niche)
 ```
 
-----------------
-Habitat
-----------------
+# Compare Habitat
 ```{r}
 figure2 = ggarrange(ncol = 2, nrow = 1,
   ggplot(pigeons, aes(x = habitat, y = urban_tolerance)) + 
@@ -112,7 +123,11 @@ kruskal.test(pigeons$urban_tolerance~pigeons$habitat)
 pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$habitat)
 ```
 
-# Urban tolerance was significantly different between different trophic niches (Chi-squared=42.834, df=6, p<0.001)
+```
+-
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=42.834, df=6, p<0.001)
+-
+```
 
 ```{r}
 kruskal.test(pigeons5$urban_tolerance~pigeons5$habitat)
@@ -136,9 +151,7 @@ pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$habitat_density)
 ```
 
 
-----------------------------
-Lifestyle
-----------------------------
+# Compare Lifestyle
 ```{r}
 figure4 = ggarrange(ncol = 2, nrow = 1,
   ggplot(pigeons, aes(x = primary_lifestyle, y = urban_tolerance)) + 
@@ -156,17 +169,20 @@ kruskal.test(pigeons$urban_tolerance~pigeons$primary_lifestyle)
 pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$primary_lifestyle)
 ```
 
-# Urban tolerance was significantly different between different trophic niches (Chi-squared=7.23, df=2, p = 0.03), with urban tolerance significantly 
-# lower in Insessorial (perching) compared to Terrestrial and Generalist
+```
+-
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=7.23, df=2, p = 0.03), with urban tolerance significantly 
+- lower in Insessorial (perching) compared to Terrestrial and Generalist
+-
+```
 
 ```{r}
 kruskal.test(pigeons5$urban_tolerance~pigeons5$primary_lifestyle)
 pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$primary_lifestyle)
 ```
 
---------------------------
-Create at locomotion trait
---------------------------
+
+# Create at locomotion trait
 ```{r}
 loco_pca = rda(pigeons[,c('tarsus_length', 'wing_index', 'tail_length')])
 pigeons$loco_pc1 = loco_pca$Ybar[,1]
@@ -192,9 +208,8 @@ ggarrange(ncol = 4, nrow = 3,
 )
 ```
 
---------------------------
-Create at trophic trait
---------------------------
+
+# Create at trophic trait
 ```{r}
 trophic_pca = rda(pigeons[,c('beak_length', 'beak_width', 'beak_depth')])
 pigeons$trophic_pc1 = trophic_pca$Ybar[,1]
@@ -220,10 +235,7 @@ ggarrange(ncol = 4, nrow = 3,
 )
 ```
 
---------------------------------------------------
-Look at traits distribution using picante
----------------------------------------------------
-
+## Look at traits distribution using picante
 ```{r}
 mapping = read_csv('./bigquery_export__columbidae_taxonomic_mapping.csv')
 ```
@@ -256,6 +268,8 @@ tiplabels(pch=22, col=picante_traits[,1], bg=picante_traits[,1], cex=1.5)
 plot(tree_pruned_to_columbidae, show.tip.label=FALSE, main='trophic')
 tiplabels(pch=22, col=picante_traits[,2], bg=picante_traits[,0], cex=1.5)
 ```
+
+## How do these new traits vary with habitat, trophic niche, and lifestyle?
 ```{R}
 ggplot(pigeons, aes(x = loco_pc1, y = trophic_pc1, color = urban_tolerance)) + geom_point() + scale_color_gradientn(colours = terrain.colors(7))
 ```

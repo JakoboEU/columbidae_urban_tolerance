@@ -3,6 +3,9 @@ title: "Presence Clustering by regional pool"
 output: html_notebook
 ---
 
+Can we cluster species together based on the regional pools they co-occur in?
+And then work out whether there are common species present/absent from those clusters?
+
 ```{r setup}
 library(dplyr)
 library(tidyverse)
@@ -19,7 +22,7 @@ col_loc <- read_csv('./bigquery_export__columbidae_jetz_urban_locations.csv')
 ```{r}
 head(col_loc)
 ```
-Create matrix of species by city, with 1 as in regional pool, and 0 as not in regional pool
+## Create matrix of species by city, with 1 as in regional pool, and 0 as not in regional pool
 ```{r}
 regional_pool_data = distinct(col_loc[,c('city_name', 'jetz_scientific_name')])
 regional_pool_data$city_name = str_replace_all(regional_pool_data$city_name, '[ ,-]+', '_')
@@ -28,11 +31,11 @@ species_in_pools = pivot_wider(regional_pool_data, names_from = city_name, value
 species_in_pools = tibble::column_to_rownames(species_in_pools, var='jetz_scientific_name')
 species_in_pools
 ```
-What is the optimium number of clusters for this matrix?
+## What is the optimium number of clusters for this matrix?
 ```{r}
 fviz_nbclust(species_in_pools, kmeans, method = "gap_stat", k.max = 25)
 ```
-Let's create 10 clusters then
+## Let's create 10 clusters then
 ```{r}
 clusters = kmeans(species_in_pools, 10)
 
@@ -42,20 +45,20 @@ rownames(clustered_species) <- NULL
 names(clustered_species) <- c('cluster', 'jetz_scientific_name')
 head(clustered_species)
 ```
-How many clusters are in London?
+### How many clusters are in London?
 ```{r}
 cities_to_clusters = left_join(col_loc, clustered_species)
 cities_to_clusters[cities_to_clusters$city_name == 'London',]
 ```
-What cities does cluster 1 cover?
+### What cities does cluster 1 cover?
 ```{r}
 unique(cities_to_clusters[cities_to_clusters$cluster == 1,c('city_name')])
 ```
-What cities does cluster 7 cover?
+### What cities does cluster 7 cover?
 ```{r}
 unique(cities_to_clusters[cities_to_clusters$cluster == 7,c('city_name')])
 ```
-Let's look at urban tolerance in each species
+## Let's look at urban tolerance in each species
 ```{r}
 col_ut <- read_csv('./bigquery_export__columbidae_jetz_urban_tolerance.csv')
 ```
@@ -63,13 +66,14 @@ col_ut <- read_csv('./bigquery_export__columbidae_jetz_urban_tolerance.csv')
 clustered_species_ut = left_join(col_ut, clustered_species)
 clustered_species_ut
 ```
-Do we have species with differing amounts of urban tolerance?  We would expect so if dominant species populate cities over others
+
+## Do we have species with differing amounts of urban tolerance?  We would expect so if dominant species populate cities over others
 ```{r, fig.width=12}
 library(ggrepel)
 ggplot(clustered_species_ut, aes(x = 1, y = urban_tolerance)) + 
   geom_text_repel(aes(label = jetz_scientific_name)) + facet_wrap(~ cluster, ncol = 5)
 ```
-Let's look at what geographical area these clusters cover
+## Let's look at what geographical area these clusters cover
 ```{r}
 clustered_species_loc = left_join(col_loc, clustered_species)
 head(clustered_species_loc)
@@ -118,9 +122,9 @@ ggplot() +
   geom_sf(data = bounding_boxes, aes(geometry = geometry, color = as.factor(cluster)), alpha = 0.2)
 ```
 
-How do traits occur within these clusters given urban tolerance?
+## How do traits occur within these clusters given urban tolerance?
 ```{r}
-avonet_birdlife = read_csv('./avonet_birdlife')
+avonet_birdlife = read_csv('./avonet_birdlife.csv')
 head(avonet_birdlife)
 ```
 ```{r}

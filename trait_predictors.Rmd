@@ -38,9 +38,8 @@ nrow(pigeons5)
 shapiro.test(pigeons$urban_tolerance) #p <= 0.05   -> Significantly different from normal
 ```
 
-----------------------------
-First look at feeding niches
-----------------------------
+
+# First look at feeding niches
 ```{r}
 figure1 = ggarrange(ncol = 2, nrow = 1,
   ggplot(pigeons, aes(x = trophic_niche, y = urban_tolerance)) + 
@@ -58,15 +57,24 @@ kruskal.test(pigeons$urban_tolerance~pigeons$trophic_niche)
 pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$trophic_niche)
 ```
 
-# Urban tolerance was significantly different between different trophic niches (Chi-squared=20.315, df=2, p<0.001), with urban tolerance significantly 
-# lower in Frugivores compared to Granivores.
+```
+-
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=20.315, df=2, p<0.001), with urban tolerance significantly 
+- lower in Frugivores compared to Granivores.
+-
+```
 
 ```{r}
 kruskal.test(pigeons5$urban_tolerance~pigeons5$trophic_niche)
 pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$trophic_niche)
 ```
-# Urban tolerance was significantly different between different trophic niches (Chi-squared=19.238, df=2, p<0.001), with urban tolerance significantly 
-# lower in Frugivores compared to Granivores.
+
+```
+-
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=19.238, df=2, p<0.001), with urban tolerance significantly 
+- lower in Frugivores compared to Granivores.
+-
+```
 
 ```{r}
 figure2 = ggarrange(ncol = 2, nrow = 1,
@@ -84,29 +92,37 @@ annotate_figure(figure2, left = textGrob("Urban tolerance", rot = 90, vjust = 1,
 kruskal.test(pigeons$urban_tolerance~pigeons$foraging_niche)
 pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$foraging_niche)
 ```
-# Urban tolerance was significantly different between different foraging niches (Chi-squared=24.204, df=3, p<0.001), with urban tolerance significantly 
-# higher in ground feeding granivores.
+
+```
+-
+- Urban tolerance was significantly different between different foraging niches (Chi-squared=24.204, df=3, p<0.001), with urban tolerance significantly 
+- higher in ground feeding granivores.
+-
+```
 
 ```{r}
 kruskal.test(pigeons5$urban_tolerance~pigeons5$foraging_niche)
 pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$foraging_niche)
 ```
-# Urban tolerance was significantly different between different foraging niches (Chi-squared=19.238, df=2, p<0.001), with urban tolerance significantly 
-# higher in ground feeding granivores.
 
-Granivore outliers
+```
+-
+- Urban tolerance was significantly different between different foraging niches (Chi-squared=19.238, df=2, p<0.001), with urban tolerance significantly 
+- higher in ground feeding granivores.
+```
+
+### Granivore outliers
 ```{r}
 pigeons5[pigeons5$trophic_niche == 'Granivore' & pigeons5$urban_tolerance <= 0.25,]
 ```
 
-Frugivore outliers
+### Frugivore outliers
 ```{r}
 pigeons5[pigeons5$trophic_niche == 'Frugivore' & pigeons5$urban_tolerance >= 0.75,]
 ```
 
------------------------
-What about morphology?
------------------------
+
+# What about morphology?
 Check if PC traits are normal dist.
 ```{r}
 shapiro.test(pigeons$pc1) #p <= 0.05   -> Significantly different from normal
@@ -143,27 +159,45 @@ annotate_figure(figure3, left = textGrob("Urban tolerance", rot = 90, vjust = 1,
 ```{r}
 cor.test(pigeons$urban_tolerance, pigeons$pc1, method="spearman")
 ```
-# There is a significant negative correlation between urban tolerance and PC1
-# (Spearman's; n=144, p = 0.03, rho=-0.1807745)
+
+```
+-
+- There is a significant negative correlation between urban tolerance and PC1
+- (Spearman's; n=144, p = 0.03, rho=-0.1807745)
+-
+```
 
 ```{r}
 cor.test(pigeons$urban_tolerance, pigeons$pc2, method="spearman")
 ```
-# There is NOT a significant correlation between urban tolerance and PC2
-# (Spearman's; n=144, p = 0.393, rho=-0.0716447)
+
+```
+-
+- There is NOT a significant correlation between urban tolerance and PC2
+- (Spearman's; n=144, p = 0.393, rho=-0.0716447)
+-
+```
 
 ```{r}
 cor.test(pigeons$urban_tolerance, pigeons$pc3, method="spearman")
 ```
-# There is NOT a significant correlation between urban tolerance and PC3
-# (Spearman's; n=144, p = 0.67, rho=0.03602794)
+
+```
+-
+- There is NOT a significant correlation between urban tolerance and PC3
+- (Spearman's; n=144, p = 0.67, rho=0.03602794)
+```
 
 ```{r}
 cor.test(pigeons$urban_tolerance, pigeons$pc4, method="spearman")
 ```
 
-# There is NOT a significant correlation between urban tolerance and PC4
-# (Spearman's; n=144, p = 0.17, rho=-0.115925)
+```
+-
+- There is NOT a significant correlation between urban tolerance and PC4
+- (Spearman's; n=144, p = 0.17, rho=-0.115925)
+-
+```
 
 ```{r}
 figure4 = ggarrange(ncol = 2, nrow = 2,
@@ -184,33 +218,47 @@ annotate_figure(figure4, left = textGrob("Urban tolerance", rot = 90, vjust = 1,
 cor.test(pigeons5$urban_tolerance, pigeons5$pc1, method="spearman")
 ```
 
-# There is a significant negative correlation between urban tolerance and PC1
-# (Spearman's; n=114, p = 0.015, rho=-0.2272254)
+```
+-
+-  There is a significant negative correlation between urban tolerance and PC1
+- (Spearman's; n=114, p = 0.015, rho=-0.2272254)
+-
+```
 
 ```{r}
 cor.test(pigeons5$urban_tolerance, pigeons5$pc2, method="spearman")
 ```
 
-# There is NOT a significant correlation between urban tolerance and PC2
-# (Spearman's; n=114, p = 0.15, rho=-0.136747)
+```
+-
+- There is NOT a significant correlation between urban tolerance and PC2
+- (Spearman's; n=114, p = 0.15, rho=-0.136747)
+-
+```
 
 ```{r}
 cor.test(pigeons5$urban_tolerance, pigeons5$pc3, method="spearman")
 ```
 
-# There is NOT a significant correlation between urban tolerance and PC3
-# (Spearman's; n=114, p = 0.57, rho=0.05381857)
+```
+-
+-  There is NOT a significant correlation between urban tolerance and PC3
+- (Spearman's; n=114, p = 0.57, rho=0.05381857)
+-
+```
 
 ```{r}
 cor.test(pigeons5$urban_tolerance, pigeons5$pc4, method="spearman")
 ```
 
-# There is NOT a significant correlation between urban tolerance and PC4
-# (Spearman's; n=114, p = 0.36, rho=-0.0857774)
+```
+-
+-  There is NOT a significant correlation between urban tolerance and PC4
+- (Spearman's; n=114, p = 0.36, rho=-0.0857774)
+-
+```
 
---------------------------------------
-so we have a model like:
---------------------------------------
+### so we have a model like:
 ```{r}
 model <- glm(formula = urban_tolerance ~ pc1 + trophic_niche, data = pigeons)
 summary(model)
@@ -226,7 +274,7 @@ R-squared:
 with(summary(model_reduced), 1 - deviance/null.deviance)
 ```
 
-And for species in 5 regional pools or more...
+### And for species in 5 regional pools or more...
 ```{r}
 model5 <- glm(formula = urban_tolerance ~ pc1 + trophic_niche, data = pigeons5)
 summary(model5)

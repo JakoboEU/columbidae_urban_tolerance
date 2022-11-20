@@ -3,6 +3,8 @@ title: "Maps of Columbidae"
 output: html_notebook
 ---
 
+# Map cities that pigeons occur in around globe
+
 ```{r setup}
 library(dplyr)
 library(tidyverse)
@@ -10,8 +12,7 @@ library(sf)
 rm(list = ls())
 ```
 
-Constants
----------
+### Constants
 ```{r}
 PRESENT_SHAPE = 20
 ABSENT_SHAPE = 4
@@ -19,8 +20,7 @@ PRESENT_COLOUR = "blue"
 ABSENT_COLOUR = "red"
 ```
 
-Load required data
-------------------
+## Load required data
 ```{r}
 col_ut <- read_csv('./bigquery_export__columbidae_jetz_urban_tolerance.csv')
 ```
@@ -67,9 +67,7 @@ st_crs(world_cities)
 world_cities <- st_transform(world_cities, crs = st_crs(country_outlines))
 ```
 
-------------------------------------------------------------
-Plot locations cities with pigeons with zero urban tolerance
-------------------------------------------------------------
+# Plot locations cities with pigeons with zero urban tolerance
 ```{r}
 intolerance_absence_records = col_loc[col_loc$jetz_scientific_name %in% col_ut$jetz_scientific_name[col_ut$urban_tolerance == 0],]
 intolerance_absence_records
@@ -88,9 +86,7 @@ ggplot() +
   theme_bw()
 ```
 
-------------------------------------------------------------
-Plot locations cities with pigeons with full urban tolerance
-------------------------------------------------------------
+# Plot locations cities with pigeons with full urban tolerance
 ```{r}
 tolerant_presence_records = col_loc[col_loc$jetz_scientific_name %in% col_ut$jetz_scientific_name[col_ut$urban_tolerance == 1],]
 tolerant_presence_records[tolerant_presence_records$jetz_scientific_name != 'Columba_livia',]
@@ -109,17 +105,15 @@ ggplot() +
   theme_bw()
 ```
 
-------------------------------------------------------------
-Create species title for presence records
-------------------------------------------------------------
+# Plot locations of most common pigeons
+
+## Create species title for presence records
 ```{r}
 col_ut$title = paste(str_replace(col_ut$jetz_scientific_name, '_', ' '), ' (', col_ut$urban_tolerance, ')', sep = '')
 head(col_ut$title)
 ```
 
-------------------------------------------------------------
-Plot locations of most common pigeons
-------------------------------------------------------------
+## Constants
 ```{r}
 TOP_X = 16
 ```
@@ -162,9 +156,8 @@ ggplot() +
   labs(title = paste(TOP_X, "most commonly occuring Columbidae"), subtitle = "Except Columba livia")
 ```
 
---------------------------------------------------------------------------
-Investigate seasonal distributions, are these related to presence?
---------------------------------------------------------------------------
+
+# Investigate seasonal distributions, are these related to presence?
 ```{r}
 dist <- read_sf('./distributions/columbidae.shp')
 head(dist)
@@ -213,11 +206,12 @@ plot_species = function(species_list_to_city_id, plot_title) {
 ```
 
 
+## Most common
 ```{r, fig.width = 12, fig.height = 20}
 plot_species(most_common[,c('jetz_scientific_name')], 'most commonly occuring Columbidae') 
 ggsave("outputs/map_most_common.jpg")
 ```
-
+## Least urban tolerant
 ```{r, fig.width = 12, fig.height = 20}
 least_tolerant = col_ut[col_ut$jetz_scientific_name != 'Columba_livia',] %>% filter(region_count > 5) %>% arrange(urban_tolerance) %>% head(TOP_X)
 plot_species(least_tolerant[,c('jetz_scientific_name')], 'least urban tolerant Columbidae')
@@ -225,7 +219,7 @@ ggsave("outputs/map_least_tolerant.jpg")
 ```
 
 
-
+## Most urban tolerant
 ```{r, fig.width = 12, fig.height = 20}
 most_tolerant = col_ut[col_ut$jetz_scientific_name != 'Columba_livia',] %>% filter(region_count > 5) %>% arrange(desc(urban_tolerance)) %>% head(TOP_X)
 plot_species(most_tolerant[,c('jetz_scientific_name')], 'most urban tolerant Columbidae') 

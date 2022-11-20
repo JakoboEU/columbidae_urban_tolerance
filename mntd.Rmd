@@ -2,16 +2,16 @@
 title: "R Notebook"
 output: html_notebook
 ---
-Triso et al. (2014):
---------------------
-A standard assumption of community phylogenetic models is that multiple niches are phylogenetically conserved and, thus, that co-occurring species should be more related than expected by chance under habitat filtering but less related under competitive exclusion (Kraft et al. 2007; but see Mayfield and Levine 2010).
 
-We selected the metrics mean phylogenetic distance (MPD) and mean nearest taxon distance (MNTD) because they are two of the most commonly used measures of community relatedness and have been the subject of previous power analyses (Kraft et al. 2007).
- 
-Mean phylogenetic distance is the mean of the pairwise phylogenetic distances between co-occurring species and is most sensitive to tree-wide patterns of phylogenetic clustering and evenness. 
+> A standard assumption of community phylogenetic models is that multiple niches are phylogenetically conserved and, thus, that co-occurring species should be more related than expected by chance under habitat filtering but less related under competitive exclusion (Kraft et al. 2007; but see Mayfield and Levine 2010).
+> We selected the metrics mean phylogenetic distance (MPD) and mean nearest taxon distance (MNTD) because they are two of the most commonly used measures of community relatedness and have been the subject of previous power analyses (Kraft et al. 2007).
+> Mean phylogenetic distance is the mean of the pairwise phylogenetic distances between co-occurring species and is most sensitive to tree-wide patterns of phylogenetic clustering and evenness. 
+> Mean nearest taxon distance is the mean of the phylogenetic distances separating each species from its closest co-occurring relative and is most sensitive to patterns of phylogenetic clustering or evenness at the tips of the phylogeny
+> --- Triso et al. (2014)
 
-Mean nearest taxon distance is the mean of the phylogenetic distances separating each species from its closest co-occurring relative and is most sensitive to patterns of phylogenetic clustering or evenness at the tips of the phylogeny
- 
+> If niche traits are conserved on a phylogeny and competitive interactions are dominant in shaping community structure, then co-occurring species should be less related (in phylogenetic or functional trait space) than by chance
+> --- Bergman et al. (2015)
+
 ```{r setup}
 library(dplyr)
 library(tidyverse)
@@ -42,9 +42,9 @@ pigeons = col_ut[,c('species_name', 'urban_tolerance', 'region_count')]
 pigeons
 ```
 
-----------------------------
-MNTD, picante
-----------------------------
+
+# MNTD, picante
+
 Need to use jetz for this
 
 the mntd function calculates the mean nearest taxon distance (MNTD), the mean distance separating each species in the community from its closest relative
@@ -115,6 +115,7 @@ mntd.result = rbind(pool.mntd.result[!is.na(pool.mntd.result$mntd.obs), c('city_
 head(mntd.result)
 ```
 
+## Does the mean MTND between regional pool and urban communities differ?
 ```{r}
 ggplot(mntd.result, aes(x = type, y = mntd.obs)) + geom_boxplot() + xlab('Community Type') + ylab('MNTD')
 ```
@@ -123,11 +124,13 @@ ggplot(mntd.result, aes(x = type, y = mntd.obs)) + geom_boxplot() + xlab('Commun
 kruskal.test(mntd.result$mntd.obs~mntd.result$type)
 ```
 
-# The mean nearest taxon distance is significantly lower in regional pools than in urban communities (chi-squard = 85.46, df = 1, p < 0.001)
+```
+-
+- The mean nearest taxon distance is significantly lower in regional pools than in urban communities (chi-squard = 85.46, df = 1, p < 0.001)
+-
+```
 
-
-Maybe a two-sided t-test is a better test?
-------------------------------------------
+## Maybe a two-sided t-test is a better test?
 ```{r}
 community_change_df = data.frame(
   city = city.mntd.result$mntd.obs,
@@ -149,6 +152,14 @@ community_change_df_l$type = factor(community_change_df_l$type, levels = c('pool
 gg_mntd_change = ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Regional and Urban Communities", subtitle = "Wilcoxon signed rank (V = 27046, p-value < 2.2e-16)")
 gg_mntd_change
 ```
+```
+-
+- The MNTD significantly increases from regional pool communities to corresponding urban communities (Wilcoxon signed rank (V = 27046, p-value < 2.2e-16))
+-
+```
+
+### Plot MNTD increases on world map:
+
 ```{r}
 world_distributions <- read_sf('./urban_centres/urban_centres.shp')
 world_cities <- distinct(world_distributions[,c('fid', 'geometry')])
@@ -186,6 +197,7 @@ gg_mntd_world = ggplot() +
 gg_mntd_world
 ```
 
+### Looks like MNTD increase in cities may be highest nearest the equator:
 ```{r}
 world_cities_mntd$abs_latitude = abs(st_coordinates(world_cities_mntd)[,2])
 model_mntd_by_latitude = glm(data = world_cities_mntd, formula = mntd_increase ~ abs_latitude)
@@ -205,6 +217,11 @@ gg_mntd_by_latitude = ggplot(world_cities_mntd, aes(x = mntd_increase, y = abs_l
   labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p = 0.00013, R2 = 0.02")
 gg_mntd_by_latitude
 ```
+```
+-
+- %MNTD increase from regional pool to urban communities significantly increases towards the equator (p < 0.001, est = -3e^6, R2 = 0.02)
+-
+```
 
 ```{r, fig.height=8,fig.width=8}
 library(grid)
@@ -216,10 +233,10 @@ grid.arrange(gg_mntd_by_latitude, gg_mntd_world, gg_mntd_change,
 )
 ```
 
-----------------------------------------------
-So which species have impact on reducing MNTD?
-----------------------------------------------
-For each species in a regional pool, we can remove it, and look at whether the MNTD of the pool increases or decreases.
+
+## So which species have impact on reducing MNTD?
+
+### For each species in a regional pool, we can remove it, and look at whether the MNTD of the pool increases or decreases.
 
 ```{r}
 species_list = colnames(species_in_pools)
@@ -300,8 +317,7 @@ mntd.species_removal$city_id = as.numeric(mntd.species_removal$city_id)
 mntd.species_removal
 ```
 
-So does whether a species contributes to increase/decrease in regional pool help predict whether they will be present or absent in the city?
----------------------------
+### So does whether a species contributes to increase/decrease in regional pool help predict whether they will be present or absent in the city?
 ```{r}
 mntd_to_presence = left_join(urban_data_jetz, mntd.species_removal, by = c('city_id' = 'city_id', 'jetz_scientific_name' = 'species_missing'))
 
@@ -313,17 +329,18 @@ summary(presence_explained_by_mntd_increase)
 with(summary(presence_explained_by_mntd_increase), 1 - deviance/null.deviance)
 ```
 
--------------------------------------------------------------------------------------------------------
-- Presence in city is significantly explained by the percentage increase in regional pool             -
-- MNTD when the species is removed from the regional pool (estimate = 0.008, p < 0.001, R2 = 0.003).  -
--------------------------------------------------------------------------------------------------------
+```
+-
+- Presence in city is significantly explained by the percentage increase in regional pool           
+- MNTD when the species is removed from the regional pool (estimate = 0.008, p < 0.001, R2 = 0.003).
+-
+```
 
 ```{r}
 ggplot(mntd_to_presence, aes(x = present_in_city, y = mntd_increase)) + geom_boxplot() + xlab("Present in city?") + ylab("% increase in MNTD")
 ```
 
-What about the total number of pools a species increases MNTD vs decreases MNTD, does this predict urban tolerance?
----------------------------------------
+### What about the total number of pools a species increases MNTD vs decreases MNTD, does this predict urban tolerance?
 ```{r}
 col_jetz_ut = urban_data_jetz %>% group_by(jetz_scientific_name) %>% summarise(region_count = n(), city_count = sum(present_in_city), urban_tolerance = sum(present_in_city)/n())
 col_jetz_ut
@@ -342,14 +359,14 @@ left_join(col_jetz_ut, mntd_species_effect, by = c('jetz_scientific_name' = 'spe
 mntd_effect_and_presence = left_join(urban_data_jetz[,c('city_id', 'jetz_scientific_name', 'present_in_city')], mntd.species_removal[,c('city_id', 'species_missing', 'effect')], by = c('city_id' = 'city_id', 'jetz_scientific_name' = 'species_missing'))
 mntd_effect_and_presence
 ```
+
 ```{r}
 table(mntd_effect_and_presence$present_in_city,mntd_effect_and_presence$effect)
 ```
+
 Not really?
 
-----------------------------------------------------------------------------------------------------
-Can we explore whether we have dominiant species that are more present in cities?
-----------------------------------------------------------------------------------------------------
+## Can we explore whether we have dominiant species that are more present in cities?
 Pair all species that cooccur in a regional pool. Calculate the MNTD between them so we know how interrelated they are.
 Does this then preduct whether those species co-occur?
 
@@ -357,7 +374,6 @@ Does this then preduct whether those species co-occur?
 species_set = urban_data_jetz[,c('city_id', 'jetz_scientific_name', 'present_in_city')]
 names(species_set) <- c('city_id', 'species', 'present_in_city')
 ```
-
 
 ```{r}
 alternative_rows = urban_data_jetz[,c('city_id', 'jetz_scientific_name', 'present_in_city')]
@@ -414,6 +430,7 @@ paired_presence
 ```{r}
 paired_presence[paired_presence$city_id == 1786,]
 ```
+
 ```{r}
 paired_presence[paired_presence$species == 'Columba_oenas' & paired_presence$alternative_species == 'Columba_palumbus',]
 ```
@@ -440,7 +457,8 @@ avonet_jetz <- distinct(avonet_jetz_pt1[!is.na(avonet_jetz_pt1$jetz_scientific_n
 #duplicates?
 avonet_jetz %>% group_by(jetz_scientific_name) %>% summarize(n = n()) %>% filter(n > 1)
 ```
-Data set of just species that are in competition for lifestyle, habitat, or food:
+
+#### Data set of just species that are in competition for lifestyle, habitat, or food:
 ```{r}
 paired_presence_with_traits_pt1 = left_join(paired_presence, avonet_jetz, by = c('species' = 'jetz_scientific_name'))
 paired_presence_with_traits_pt2 = left_join(paired_presence_with_traits_pt1, avonet_jetz, suffix = c('', '.Alternative'), by = c('alternative_species' = 'jetz_scientific_name'))
@@ -454,15 +472,17 @@ paired_presence_shared_traits = paired_presence_with_traits_pt2[
 ,]
 paired_presence_shared_traits
 ```
-All species pairs
+
+### Test For all species pairs
 ```{r}
 kruskal.test(paired_presence_with_traits_pt2$mntd~paired_presence_with_traits_pt2$cooccur)
 ```
+
 ```{R}
 ggplot(paired_presence_with_traits_pt2, aes(x = cooccur, y = mntd)) + geom_boxplot() + labs(title = "Paired species", subtitle = "All species pairs")
 ```
 
-Species paired by lifestyle, habitat, and trophic niche:
+### Test for species paired by lifestyle, habitat, and trophic niche:
 ```{r}
 kruskal.test(paired_presence_shared_traits$mntd~paired_presence_shared_traits$cooccur)
 ```
@@ -470,7 +490,14 @@ kruskal.test(paired_presence_shared_traits$mntd~paired_presence_shared_traits$co
 ```{R}
 ggplot(paired_presence_shared_traits, aes(x = cooccur, y = mntd)) + geom_boxplot() + labs(title = "Paired species", subtitle = "Species sharing lifestyle, habitat, and trophic niche")
 ```
-# Species are more likely to cooccur if they are phylogentically further apart (Chi-squared=21.629, df=1, p<0.001).
+
+```
+-
+- Species are more likely to cooccur if they are phylogentically further apart (Chi-squared=21.629, df=1, p<0.001).
+-
+```
+
+### How does cooccurance between pairs change amongst other traits?
 
 ```{r}
 library(corrplot)
@@ -507,7 +534,6 @@ chisq.habitat
 round(chisq.habitat$residuals, 2)
 corrplot(chisq.habitat$residuals, is.cor = FALSE)
 ```
-
 
 ```{r}
 ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Terrestrial',], aes(x = cooccur, y = mntd)) + geom_boxplot() + xlab("Cooccuring pairs?") + ylab("Paired MNTD") + labs(title = "Terrestrial Species")

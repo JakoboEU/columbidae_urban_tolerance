@@ -536,9 +536,102 @@ corrplot(chisq.habitat$residuals, is.cor = FALSE)
 ```
 
 ```{r}
-ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Terrestrial',], aes(x = cooccur, y = mntd)) + geom_boxplot() + xlab("Cooccuring pairs?") + ylab("Paired MNTD") + labs(title = "Terrestrial Species")
+ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Insessorial',], aes(x = cooccur, y = mntd)) + geom_boxplot() + xlab("Cooccuring pairs?") + ylab("Paired MNTD") + labs(title = "Insessorial Species")
 ```
 
 ```{r}
 ggplot(paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore',], aes(x = cooccur, y = mntd)) + geom_boxplot() + xlab("Cooccuring pairs?") + ylab("Paired MNTD")+ labs(title = "Frugivore Species")
 ```
+
+# Does the city design impact whether Forest, Frugivores or Insessorial species co-occur?
+```{r}
+city_data = read_csv('./earthengine_export__columbidae-city-landscape-data.csv')
+city_data = city_data[ , -which(names(city_data) %in% c("system:index",".geo", 'city_calcuated_area', 'city_min_pop_dens'))]
+city_data = distinct(city_data)
+
+city_data %>% group_by(city_id) %>% summarise(n = n()) %>% filter(n > 1)
+
+length(city_data$city_id)
+length(unique(city_data$city_id))
+
+which(city_data$city_id == '9713')[2]
+
+city_data = city_data[-which(city_data$city_id == '9713')[2],]
+```
+
+```{r}
+biome_data = read_csv('./earthengine_export__columbidae-city-biome-data.csv')
+biome_data = biome_data[ , -which(names(biome_data) %in% c("system:index",".geo", 'biome_id', 'eco_id', 'nnh_id', 'nnh_name', 'eco_name'))]
+biome_data$biome_name = as.factor(biome_data$biome_name)
+biome_data$realm = as.factor(biome_data$realm)
+
+biome_data = distinct(biome_data)
+
+length(biome_data$city_id)
+length(unique(biome_data$city_id))
+
+biome_data[biome_data$city_id == '122',]
+```
+
+```{r}
+paired_presence_shared_traits[!paired_presence_shared_traits$city_id %in% biome_data$city_id,]
+paired_presence_shared_traits[!paired_presence_shared_traits$city_id %in% city_data$city_id,]
+```
+
+## Frugivore
+```{r}
+nrow(paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore',])
+
+frugivore_paired_to_city_data = left_join(paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore', c('city_id', 'cooccur')], city_data)
+frugivore_paired_to_city_data
+```
+
+```{r}
+library(VSURF)
+frugivore_response <- frugivore_paired_to_city_data$cooccur
+frugivore_predictors <- frugivore_paired_to_city_data[ , -which(names(frugivore_paired_to_city_data) %in% c('cooccur'))]
+```
+
+```{r}
+frugivore_interp <- VSURF(x = frugivore_predictors, y  = frugivore_response)
+names(frugivore_interp[,frugivore_interp$varselect.interp])
+```
+
+
+## Insessorial
+```{r}
+nrow(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Insessorial',])
+
+insessorial_paired_to_city_data = left_join(paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Insessorial', c('city_id', 'cooccur')], city_data)
+insessorial_paired_to_city_data
+```
+
+```{r}
+insessorial_response <- insessorial_paired_to_city_data$cooccur
+insessorial_predictors <- insessorial_paired_to_city_data[ , -which(names(insessorial_paired_to_city_data) %in% c('cooccur'))]
+```
+
+```{r}
+insessorial_interp <- VSURF(x = insessorial_predictors, y  = insessorial_response)
+names(insessorial_interp[,insessorial_interp$varselect.interp])
+```
+
+
+## Forest
+```{r}
+nrow(paired_presence_shared_traits[paired_presence_shared_traits$Habitat == 'Forest',])
+
+forest_paired_to_city_data = left_join(paired_presence_shared_traits[paired_presence_shared_traits$Habitat == 'Forest', c('city_id', 'cooccur')], city_data)
+forest_paired_to_city_data
+```
+
+```{r}
+forest_response <- forest_paired_to_city_data$cooccur
+forest_predictors <- forest_paired_to_city_data[ , -which(names(forest_paired_to_city_data) %in% c('cooccur'))]
+```
+
+```{r}
+forest_interp <- VSURF(x = forest_predictors, y  = forest_response)
+names(forest_interp[,forest_interp$varselect.interp])
+```
+

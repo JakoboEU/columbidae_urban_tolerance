@@ -200,22 +200,31 @@ gg_mntd_world
 ### Looks like MNTD increase in cities may be highest nearest the equator:
 ```{r}
 world_cities_mntd$abs_latitude = abs(st_coordinates(world_cities_mntd)[,2])
-model_mntd_by_latitude = glm(data = world_cities_mntd, formula = mntd_increase ~ abs_latitude)
-summary(model_mntd_by_latitude)
+model_mntd_by_abs_latitude = glm(data = world_cities_mntd, formula = mntd_increase ~ abs_latitude)
+summary(model_mntd_by_abs_latitude)
 ```
 
 R-squared:
+```{r}
+with(summary(model_mntd_by_abs_latitude), 1 - deviance/null.deviance)
+```
+
+```{r}
+world_cities_mntd$latitude = st_coordinates(world_cities_mntd)[,2]
+model_mntd_by_latitude = glm(data = world_cities_mntd, formula = mntd_increase ~ I(latitude^2))
+summary(model_mntd_by_latitude)
+```
 ```{r}
 with(summary(model_mntd_by_latitude), 1 - deviance/null.deviance)
 ```
 
 ```{r}
-gg_mntd_by_latitude = ggplot(world_cities_mntd, aes(x = mntd_increase, y = abs_latitude)) +
+gg_mntd_by_abs_latitude = ggplot(world_cities_mntd, aes(y = mntd_increase, x = abs_latitude)) +
   geom_point() +
   geom_smooth(method = "glm") + 
-  xlab("% Increase in MNTD") + ylab("Absolute latitude") + 
+  ylab("% Increase in MNTD") + xlab("Absolute latitude") + 
   labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p = 0.00013, R2 = 0.02")
-gg_mntd_by_latitude
+gg_mntd_by_abs_latitude
 ```
 ```
 -
@@ -223,10 +232,19 @@ gg_mntd_by_latitude
 -
 ```
 
+```{r}
+gg_mntd_by_latitude = ggplot(world_cities_mntd, aes(x =  latitude, y =mntd_increase)) +
+  geom_point() +
+  geom_smooth(method = "glm", formula = y ~ I(x^2)) + 
+  ylab("% Increase in MNTD") + xlab("Latitude") + 
+  labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p = 0.00013, R2 = 0.02")
+gg_mntd_by_latitude
+```
+
 ```{r, fig.height=8,fig.width=8}
 library(grid)
 library(gridExtra)
-grid.arrange(gg_mntd_by_latitude, gg_mntd_world, gg_mntd_change,
+grid.arrange(gg_mntd_by_abs_latitude, gg_mntd_world, gg_mntd_change,
   widths = c(2, 1), heights = c(3, 4),
   layout_matrix = rbind(c(1, NA),
                         c(3, 4))

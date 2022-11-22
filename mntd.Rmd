@@ -90,12 +90,12 @@ tree_pruned_to_columbidae <- ladderize(drop.tip(tree, setdiff(tree$tip.label, co
 phydist <- cophenetic(tree_pruned_to_columbidae)
 ```
 
-```{r}
+```{r, cache=TRUE}
 pool.mntd.result <- ses.mntd(picante_pool_community, phydist, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
 pool.mntd.result
 ```
 
-```{r}
+```{r, cache=TRUE}
 city.mntd.result <- ses.mntd(picante_urban_community, phydist, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
 city.mntd.result
 ```
@@ -244,13 +244,16 @@ gg_mntd_by_latitude
 ```{r, fig.height=8,fig.width=8}
 library(grid)
 library(gridExtra)
-grid.arrange(gg_mntd_by_abs_latitude, gg_mntd_world, gg_mntd_change,
-  widths = c(2, 1), heights = c(3, 4),
-  layout_matrix = rbind(c(1, NA),
-                        c(3, 4))
+mntd_plot = grid.arrange(gg_mntd_by_abs_latitude, gg_mntd_world, gg_mntd_change,
+  widths = c(1, 1), heights = c(1, 2),
+  layout_matrix = rbind(c(3, 1),
+                        c(2))
 )
+mntd_plot
 ```
-
+```{r}
+ggsave("./outputs/mntd.jpg", mntd_plot, height = 3074, width=4112, units = "px")
+```
 
 ## So which species have impact on reducing MNTD?
 
@@ -309,7 +312,7 @@ example_remove_species.mntd.result$effect = ifelse(example_remove_species.mntd.r
 example_remove_species.mntd.result
 ```
 
-```{r}
+```{r, cache=TRUE}
 mntd.species_removal = data.frame()
 
 for (species_id in 1:length(species_list)) {
@@ -420,7 +423,7 @@ mntd.community.result = ses.mntd(as.matrix(community), phydist, null.model="taxa
 mntd.community.result[1,]$mntd.obs
 ```
 
-```{r}
+```{r, cache=TRUE}
 species_combinations$mntd = NA
 
 for(row_i in 1:nrow(species_combinations)) {
@@ -506,7 +509,21 @@ kruskal.test(paired_presence_shared_traits$mntd~paired_presence_shared_traits$co
 ```
 
 ```{R}
-ggplot(paired_presence_shared_traits, aes(x = cooccur, y = mntd)) + geom_boxplot() + labs(title = "Paired species", subtitle = "Species sharing lifestyle, habitat, and trophic niche")
+paired_presence_shared_traits_summary = paired_presence_shared_traits %>% group_by(cooccur) %>% summarise(mean = mean(mntd), sd = sd(mntd))
+paired_presence_shared_traits_summary$lower_limit = paired_presence_shared_traits_summary$mean - paired_presence_shared_traits_summary$sd
+paired_presence_shared_traits_summary$upper_limit = paired_presence_shared_traits_summary$mean + paired_presence_shared_traits_summary$sd
+
+gg_paired_presence_by_mtnd = ggplot(paired_presence_shared_traits, aes(x = cooccur)) +
+  geom_violin(aes(y = mntd)) + 
+  geom_point(data = paired_presence_shared_traits_summary, aes(y = mean), color = "red") +
+  geom_text(data = paired_presence_shared_traits_summary, aes(y = mean, label = round(mean, 1)), color = "red", nudge_x = 0.2) +
+  geom_errorbar(data = paired_presence_shared_traits_summary, aes(ymin= lower_limit, ymax = upper_limit), color = "red", width = 0.2) +
+  geom_text(data = paired_presence_shared_traits_summary, aes(y = lower_limit, label = round(lower_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
+  geom_text(data = paired_presence_shared_traits_summary, aes(y = upper_limit, label = round(upper_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
+  labs(title = "Paired species\nthat share lifestyle, habitat, and trophic niche", subtitle = "chi-squared = 21.629, df = 1, p-value < 0.001") + xlab("Species pair co-occur?") + ylab("MNTD between species pair")
+gg_paired_presence_by_mtnd
+
+ggsave('./outputs/pairs_by_mntd.jpg')
 ```
 
 ```
@@ -530,11 +547,23 @@ corrplot(chisq.lifestyle$residuals, is.cor = FALSE)
 ```
 
 ```{r}
+jpeg("outputs/som_pairs_by_lifestyle.jpg", width = 1024, height=778)
+corrplot(chisq.lifestyle$residuals, is.cor = FALSE)
+dev.off()
+```
+
+```{r}
 table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Trophic.Niche)
 chisq.trophic = chisq.test(table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Trophic.Niche))
 chisq.trophic
 round(chisq.trophic$residuals, 2)
 corrplot(chisq.trophic$residuals, is.cor = FALSE)
+```
+
+```{r}
+jpeg("outputs/som_pairs_by_trophic_niche.jpg", width = 1024, height=778)
+corrplot(chisq.trophic$residuals, is.cor = FALSE)
+dev.off()
 ```
 
 ```{r}
@@ -545,12 +574,18 @@ round(chisq.habitat.density$residuals, 2)
 corrplot(chisq.habitat.density$residuals, is.cor = FALSE)
 ```
 
+
 ```{r}
 table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat)
 chisq.habitat = chisq.test(table(paired_presence_shared_traits$cooccur, paired_presence_shared_traits$Habitat))
 chisq.habitat
 round(chisq.habitat$residuals, 2)
 corrplot(chisq.habitat$residuals, is.cor = FALSE)
+```
+```{r}
+jpeg("outputs/som_pairs_by_habitat.jpg", width = 1024, height=778)
+corrplot(chisq.habitat$residuals, is.cor = FALSE)
+dev.off()
 ```
 
 ```{r}
@@ -610,7 +645,7 @@ frugivore_response <- frugivore_paired_to_city_data$cooccur
 frugivore_predictors <- frugivore_paired_to_city_data[ , -which(names(frugivore_paired_to_city_data) %in% c('cooccur'))]
 ```
 
-```{r}
+```{r, cache=TRUE}
 frugivore_interp <- VSURF(x = frugivore_predictors, y  = frugivore_response)
 names(frugivore_predictors[,frugivore_interp$varselect.interp])
 ```
@@ -629,7 +664,7 @@ insessorial_response <- insessorial_paired_to_city_data$cooccur
 insessorial_predictors <- insessorial_paired_to_city_data[ , -which(names(insessorial_paired_to_city_data) %in% c('cooccur'))]
 ```
 
-```{r}
+```{r, cache=TRUE}
 insessorial_interp <- VSURF(x = insessorial_predictors, y  = insessorial_response)
 names(insessorial_predictors[,insessorial_interp$varselect.interp])
 ```
@@ -648,7 +683,7 @@ forest_response <- forest_paired_to_city_data$cooccur
 forest_predictors <- forest_paired_to_city_data[ , -which(names(forest_paired_to_city_data) %in% c('cooccur'))]
 ```
 
-```{r}
+```{r, cache=TRUE}
 forest_interp <- VSURF(x = forest_predictors, y  = forest_response)
 names(forest_predictors[,forest_interp$varselect.interp])
 ```
@@ -665,6 +700,19 @@ ggvenn(
     'Forest dwellers' = paired_presence_shared_traits[paired_presence_shared_traits$Habitat == 'Forest',]$species
   ))
 ```
+
+```{r}
+jpeg("outputs/som_pairs_species_venn.jpg", width = 1024, height=778)
+grid.newpage()  
+ggvenn(
+  list(
+    'Frugivores' = paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore',]$species, 
+    'Insessorial' = paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Insessorial',]$species, 
+    'Forest dwellers' = paired_presence_shared_traits[paired_presence_shared_traits$Habitat == 'Forest',]$species
+  ))
+dev.off()
+```
+
 ## Plots for frugivores and insessorial species
 ```{r}
 kruskal.test(frugivore_paired_to_city_data$city_lc_open_forest_forest_total~frugivore_paired_to_city_data$cooccur)
@@ -685,14 +733,15 @@ frugivore_paired_summary = frugivore_paired_to_city_data %>% group_by(cooccur) %
 frugivore_paired_summary$lower_limit = frugivore_paired_summary$mean - frugivore_paired_summary$sd
 frugivore_paired_summary$upper_limit = frugivore_paired_summary$mean + frugivore_paired_summary$sd
 
-ggplot(frugivore_paired_to_city_data, aes(x = cooccur)) +
+gg_frugivore_forest = ggplot(frugivore_paired_to_city_data, aes(x = cooccur)) +
   geom_violin(aes(y = city_lc_open_forest_forest_total_km)) + 
   geom_point(data = frugivore_paired_summary, aes(y = mean), color = "red") +
   geom_text(data = frugivore_paired_summary, aes(y = mean, label = round(mean, 1)), color = "red", nudge_x = 0.2) +
   geom_errorbar(data = frugivore_paired_summary, aes(ymin= lower_limit, ymax = upper_limit), color = "red", width = 0.2) +
   geom_text(data = frugivore_paired_summary, aes(y = lower_limit, label = round(lower_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
   geom_text(data = frugivore_paired_summary, aes(y = upper_limit, label = round(upper_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  xlab('Species pair co-occur') + ylab('Total open forest cover km2') + labs(title='Frugivore/Insessorial co-occurance vs total open forest cover', subtitle = 'chi-squared = 55.352, df = 1, p-value < 0.001')
+  xlab('Species pair co-occur') + ylab('Total open forest cover km2') + labs(title='Frugivore/Insessorial co-occurance\nvs total open forest cover', subtitle = 'chi-squared = 55.352, df = 1, p-value < 0.001')
+gg_frugivore_forest
 ```
 
 ## Reduce predictors for Forest dwellers using stepwise reduction
@@ -708,16 +757,25 @@ summary(forest_predictors_pca)
 ```{r}
 biplot(forest_predictors_pca, scaling = -1)
 ```
+
 ```{r}
 plot(forest_predictors_pca, display = "sites")
 with(forest_paired_to_city_data, ordiellipse(forest_predictors_pca, cooccur, col=4, lwd=2, draw = "polygon", kind = c("sd"))) 
 with(forest_paired_to_city_data, ordispider(forest_predictors_pca, cooccur, label=TRUE))
 ```
+
 ```{r}
 forest_ef <- envfit(forest_predictors_pca, forest_paired_to_city_data[,c("city_lc_open_forest_evergreen_broadleaf","city_lc_open_forest_forest_total","city_lc_permanent_water" ,"city_lc_closed_forest_evergreen_broadleaf","city_pc_open_forest_evergreen_broadleaf","city_rainfall_average_annual","city_pc_closed_forest_evergreen_broadleaf","city_lc_area","region_50_surface_moisture","city_rainfall_average_min_monthly")], na.rm = TRUE, permu = 999) 
 
 plot(forest_predictors_pca, display = "sites")
 plot(forest_ef, p.max = 0.05)
+```
+
+```{r}
+jpeg("outputs/som_pca_forest_dwellers_landscape_vars.jpg", width = 1024, height=778)
+plot(forest_predictors_pca, display = "sites")
+plot(forest_ef, p.max = 0.05)
+dev.off()
 ```
 
 ```{r}
@@ -740,14 +798,15 @@ kruskal.test(forest_paired_to_city_data$pc2~forest_paired_to_city_data$cooccur)
 ```
 
 ```{r}
-ggplot(forest_paired_to_city_data, aes(x = cooccur)) +
+gg_forest_pc1 = ggplot(forest_paired_to_city_data, aes(x = cooccur)) +
   geom_violin(aes(y = pc1)) + 
   geom_point(data = forest_paired_summary, aes(y = mean_pc1), color = "red") +
   geom_text(data = forest_paired_summary, aes(y = mean_pc1, label = round(mean_pc1, 1)), color = "red", nudge_x = 0.2) +
   geom_errorbar(data = forest_paired_summary, aes(ymin= lower_limit_pc1, ymax = upper_limit_pc1), color = "red", width = 0.2) +
   geom_text(data = forest_paired_summary, aes(y = lower_limit_pc1, label = round(lower_limit_pc1, 1)), color = "red", nudge_x = 0.2, size = 3) +
   geom_text(data = forest_paired_summary, aes(y = upper_limit_pc1, label = round(upper_limit_pc1, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  xlab('Species pair co-occur') + ylab('PC1 - Closed Forest / Average Rainfall') + labs(title='Forest Dwellers vs city landscape PC1 (99.7%)', subtitle = 'chi-squared = 62.286, df = 1, p-value < 0.001')
+  xlab('Species pair co-occur') + ylab('PC1 - Closed Forest / Average Rainfall') + labs(title='Forest Dwellers\nvs city landscape PC1 (99.7%)', subtitle = 'chi-squared = 62.286, df = 1, p-value < 0.001')
+gg_forest_pc1
 ```
                                                                                                                                                       
 
@@ -759,5 +818,15 @@ ggplot(forest_paired_to_city_data, aes(x = cooccur)) +
   geom_errorbar(data = forest_paired_summary, aes(ymin= lower_limit_pc2, ymax = upper_limit_pc2), color = "red", width = 0.2) +
   geom_text(data = forest_paired_summary, aes(y = lower_limit_pc2, label = round(lower_limit_pc2, 1)), color = "red", nudge_x = 0.2, size = 3) +
   geom_text(data = forest_paired_summary, aes(y = upper_limit_pc2, label = round(upper_limit_pc2, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  xlab('Species pair co-occur') + ylab('PC2 - Open Forest / Min rainfall / City Area') + labs(title='Forest Dwellers vs city landscape PC2 (0.001%)', subtitle = 'chi-squared = 59.437, df = 1, p-value < 0.001')
+  xlab('Species pair co-occur') + ylab('PC2 - Open Forest / Min rainfall / City Area') + labs(title='Forest Dwellers\nvs city landscape PC2 (0.001%)', subtitle = 'chi-squared = 59.437, df = 1, p-value < 0.001')
 ```
+
+```{r}
+gg_coocurr_to_landscape = grid.arrange(gg_frugivore_forest, gg_forest_pc1,  ncol = 2, nrow = 1)
+gg_coocurr_to_landscape
+```
+
+```{r}
+ggsave('./outputs/cooccurance_based_on_landscape.jpg', gg_coocurr_to_landscape, units = "px", width=2256, height=1736)
+```
+

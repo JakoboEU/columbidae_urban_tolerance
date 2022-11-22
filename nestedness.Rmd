@@ -44,7 +44,11 @@ temp
 plot(temp, xlab = "Species", ylab="Sites",main="Extinction probability")
 plot(temp, kind="incidence",xlab = "Species", ylab="Sites",main="Presence-absence")
 ```
-
+```{r}
+jpeg("./outputs/nestedness.jpg", width = 778, height=512)
+plot(temp, kind="incidence",xlab = "Species", ylab="Sites",main="Presence-absence")
+dev.off()
+```
 
 > Function nestedchecker gives the number of checkerboard units, or 2x2 submatrices where both species occur once but on different sites (Stone & Roberts 1990). 
 
@@ -61,4 +65,10 @@ oecosimu(species_city_presence, nestedtemp, "quasiswap")
 
 ```{r}
 oecosimu(species_city_presence, nestedchecker, "quasiswap")
+```
+
+```
+-
+- Urban assemblages have a significantly nested sub-structure (matrix T=19.7°C; p= 0.01)
+-
 ```

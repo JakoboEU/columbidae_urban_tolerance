@@ -594,7 +594,7 @@ frugivore_predictors <- frugivore_paired_to_city_data[ , -which(names(frugivore_
 
 ```{r}
 frugivore_interp <- VSURF(x = frugivore_predictors, y  = frugivore_response)
-names(frugivore_interp[,frugivore_interp$varselect.interp])
+names(frugivore_predictors[,frugivore_interp$varselect.interp])
 ```
 
 
@@ -613,7 +613,7 @@ insessorial_predictors <- insessorial_paired_to_city_data[ , -which(names(insess
 
 ```{r}
 insessorial_interp <- VSURF(x = insessorial_predictors, y  = insessorial_response)
-names(insessorial_interp[,insessorial_interp$varselect.interp])
+names(insessorial_predictors[,insessorial_interp$varselect.interp])
 ```
 
 
@@ -632,6 +632,6 @@ forest_predictors <- forest_paired_to_city_data[ , -which(names(forest_paired_to
 
 ```{r}
 forest_interp <- VSURF(x = forest_predictors, y  = forest_response)
-names(forest_interp[,forest_interp$varselect.interp])
+names(forest_predictors[,forest_interp$varselect.interp])
 ```
 

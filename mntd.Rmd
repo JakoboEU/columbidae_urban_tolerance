@@ -635,3 +635,79 @@ forest_interp <- VSURF(x = forest_predictors, y  = forest_response)
 names(forest_predictors[,forest_interp$varselect.interp])
 ```
 
+## How much overlap in species is there between each dataset?
+```{r}
+library(ggvenn)
+
+grid.newpage()  
+ggvenn(
+  list(
+    'Frugivores' = paired_presence_shared_traits[paired_presence_shared_traits$Trophic.Niche == 'Frugivore',]$species, 
+    'Insessorial' = paired_presence_shared_traits[paired_presence_shared_traits$Primary.Lifestyle == 'Insessorial',]$species, 
+    'Forest dwellers' = paired_presence_shared_traits[paired_presence_shared_traits$Habitat == 'Forest',]$species
+  ))
+```
+## Plots for frugivores and insessorial species
+```{r}
+kruskal.test(frugivore_paired_to_city_data$city_lc_open_forest_forest_total~frugivore_paired_to_city_data$cooccur)
+```
+
+```{r}
+mean(frugivore_paired_to_city_data[frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
+sd(frugivore_paired_to_city_data[frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
+
+mean(frugivore_paired_to_city_data[!frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
+sd(frugivore_paired_to_city_data[!frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
+```
+
+```{r}
+frugivore_paired_to_city_data$city_lc_open_forest_forest_total_km = frugivore_paired_to_city_data$city_lc_open_forest_forest_total / 100
+
+frugivore_paired_summary = frugivore_paired_to_city_data %>% group_by(cooccur) %>% summarise(mean = mean(city_lc_open_forest_forest_total_km), sd = sd(city_lc_open_forest_forest_total_km))
+frugivore_paired_summary$lower_limit = frugivore_paired_summary$mean - frugivore_paired_summary$sd
+frugivore_paired_summary$upper_limit = frugivore_paired_summary$mean + frugivore_paired_summary$sd
+
+ggplot(frugivore_paired_to_city_data, aes(x = cooccur)) +
+  geom_violin(aes(y = city_lc_open_forest_forest_total_km)) + 
+  geom_point(data = frugivore_paired_summary, aes(y = mean), color = "red") +
+  geom_text(data = frugivore_paired_summary, aes(y = mean, label = round(mean, 1)), color = "red", nudge_x = 0.2) +
+  geom_errorbar(data = frugivore_paired_summary, aes(ymin= lower_limit, ymax = upper_limit), color = "red", width = 0.2) +
+  geom_text(data = frugivore_paired_summary, aes(y = lower_limit, label = round(lower_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
+  geom_text(data = frugivore_paired_summary, aes(y = upper_limit, label = round(upper_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
+  xlab('Species pair co-occur') + ylab('Total open forest cover km2') + labs(title='Frugivore/Insessorial co-occurance vs total open forest cover', subtitle = 'chi-squared = 55.352, df = 1, p-value < 0.001')
+```
+
+## Reduce predictors for Forest dwellers using stepwise reduction
+ [1] "city_lc_open_forest_evergreen_broadleaf"   "city_lc_open_forest_forest_total"          "city_lc_permanent_water"                   "city_lc_closed_forest_forest_total"       
+ [5] "city_lc_closed_forest_evergreen_broadleaf" "city_pc_open_forest_evergreen_broadleaf"   "city_rainfall_average_annual"              "city_pc_closed_forest_evergreen_broadleaf"
+ [9] "city_lc_area"                              "region_50_surface_moisture"                "city_rainfall_average_min_monthly"  
+ 
+```{r}
+forest_predictors_pca <- rda(forest_paired_to_city_data[,c("city_lc_open_forest_evergreen_broadleaf","city_lc_open_forest_forest_total","city_lc_permanent_water" ,"city_lc_closed_forest_evergreen_broadleaf","city_pc_open_forest_evergreen_broadleaf","city_rainfall_average_annual","city_pc_closed_forest_evergreen_broadleaf","city_lc_area","region_50_surface_moisture","city_rainfall_average_min_monthly")])
+summary(forest_predictors_pca)
+```
+
+```{r}
+biplot(forest_predictors_pca, scaling = -1)
+```
+```{r}
+forest_paired_to_city_data$pc1 = forest_predictors_pca$Ybar[,1]
+
+forest_paired_summary = forest_paired_to_city_data %>% group_by(cooccur) %>% summarise(mean = mean(pc1), sd = sd(pc1))
+forest_paired_summary$lower_limit = forest_paired_summary$mean - forest_paired_summary$sd
+forest_paired_summary$upper_limit = forest_paired_summary$mean + forest_paired_summary$sd
+
+ggplot(forest_paired_to_city_data, aes(x = cooccur)) +
+  geom_violin(aes(y = pc1)) + 
+  geom_point(data = forest_paired_summary, aes(y = mean), color = "red") +
+  geom_text(data = forest_paired_summary, aes(y = mean, label = round(mean, 1)), color = "red", nudge_x = 0.2) +
+  geom_errorbar(data = forest_paired_summary, aes(ymin= lower_limit, ymax = upper_limit), color = "red", width = 0.2) +
+  geom_text(data = forest_paired_summary, aes(y = lower_limit, label = round(lower_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
+  geom_text(data = forest_paired_summary, aes(y = upper_limit, label = round(upper_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
+  xlab('Species pair co-occur') + ylab('PC1') + labs(title='Forest Dwellers vs city landscape PC1', subtitle = 'chi-squared = 62.286, df = 1, p-value < 0.001')
+```
+                                                                                                                                                       
+```{r}
+kruskal.test(forest_paired_to_city_data$pc1~forest_paired_to_city_data$cooccur)
+```
+

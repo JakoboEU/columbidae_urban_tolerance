@@ -69,6 +69,6 @@ oecosimu(species_city_presence, nestedchecker, "quasiswap")
 
 ```
 -
-- Urban assemblages have a significantly nested sub-structure (matrix T=19.7°C; p= 0.01)
+- Urban assemblages have a significantly nested sub-structure (matrix T=6.8°C; p= 0.01)
 -
 ```

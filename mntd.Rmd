@@ -24,6 +24,9 @@ library(grid)
 library(vegan)
 library(phytools)
 library(picante)
+```
+
+```{r}
 rm(list = ls())
 ```
 
@@ -64,6 +67,7 @@ species_in_cities = tibble::column_to_rownames(species_in_cities, var='city_id')
 picante_urban_community = as.matrix(species_in_cities)
 species_in_cities
 ```
+
 ```{r}
 urban_data_jetz[urban_data_jetz$jetz_scientific_name == 'Columba_guinea',]
 ```
@@ -126,7 +130,7 @@ kruskal.test(mntd.result$mntd.obs~mntd.result$type)
 
 ```
 -
-- The mean nearest taxon distance is significantly lower in regional pools than in urban communities (chi-squard = 85.46, df = 1, p < 0.001)
+- The mean nearest taxon distance is significantly lower in regional pools than in urban communities (chi-squard = 90.7, df = 1, p < 0.001)
 -
 ```
 
@@ -149,12 +153,12 @@ wilcox.test(community_change_df$pool, community_change_df$city, paired = TRUE)
 community_change_df_l = pivot_longer(community_change_df, names_to = 'type', values_to = 'value', cols = c('pool', 'city'))
 community_change_df_l$type = factor(community_change_df_l$type, levels = c('pool', 'city'), labels = c('Regional Pool', 'Urban'))
 
-gg_mntd_change = ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Regional and Urban Communities", subtitle = "Wilcoxon signed rank (V = 27046, p-value < 2.2e-16)")
+gg_mntd_change = ggplot(community_change_df_l, aes(x = type, y = value)) + geom_line(aes(group = id), size = 0.1) +  geom_boxplot() + xlab('Community') + ylab('MNTD') + labs(title = "MNTD Change between Regional and Urban Communities", subtitle = "Wilcoxon signed rank (V = 3782, p-value < 0.001)")
 gg_mntd_change
 ```
 ```
 -
-- The MNTD significantly increases from regional pool communities to corresponding urban communities (Wilcoxon signed rank (V = 27046, p-value < 2.2e-16))
+- The MNTD significantly increases from regional pool communities to corresponding urban communities (Wilcoxon signed rank (V = 3782, p-value < 0.001))
 -
 ```
 
@@ -223,12 +227,12 @@ gg_mntd_by_abs_latitude = ggplot(world_cities_mntd, aes(y = mntd_increase, x = a
   geom_point() +
   geom_smooth(method = "glm") + 
   ylab("% Increase in MNTD") + xlab("Absolute latitude") + 
-  labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p = 0.00013, R2 = 0.02")
+  labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p < 0.001, R2 = 0.05")
 gg_mntd_by_abs_latitude
 ```
 ```
 -
-- %MNTD increase from regional pool to urban communities significantly increases towards the equator (p < 0.001, est = -3e^6, R2 = 0.02)
+- %MNTD increase from regional pool to urban communities significantly increases towards the equator (p < 0.001, est = -6.8e-06, R2 = 0.05)
 -
 ```
 
@@ -237,7 +241,7 @@ gg_mntd_by_latitude = ggplot(world_cities_mntd, aes(x =  latitude, y =mntd_incre
   geom_point() +
   geom_smooth(method = "glm", formula = y ~ I(x^2)) + 
   ylab("% Increase in MNTD") + xlab("Latitude") + 
-  labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p = 0.00013, R2 = 0.02")
+  labs(title = "MNTD significantly increases in response to urbanisation as towards equator", subtitle = "p < 0.001, R2 = 0.07")
 gg_mntd_by_latitude
 ```
 
@@ -353,7 +357,7 @@ with(summary(presence_explained_by_mntd_increase), 1 - deviance/null.deviance)
 ```
 -
 - Presence in city is significantly explained by the percentage increase in regional pool           
-- MNTD when the species is removed from the regional pool (estimate = 0.008, p < 0.001, R2 = 0.003).
+- MNTD when the species is removed from the regional pool (estimate = 0.01, p < 0.001, R2 = 0.005).
 -
 ```
 
@@ -528,7 +532,7 @@ ggsave('./outputs/pairs_by_mntd.jpg')
 
 ```
 -
-- Species are more likely to cooccur if they are phylogentically further apart (Chi-squared=21.629, df=1, p<0.001).
+- Species are more likely to cooccur if they are phylogentically further apart (Chi-squared=4.7, df=1, p = 0.03).
 -
 ```
 
@@ -713,120 +717,23 @@ ggvenn(
 dev.off()
 ```
 
-## Plots for frugivores and insessorial species
+
+## Produce a plot of species vs species with interaction score shown
+
 ```{r}
-kruskal.test(frugivore_paired_to_city_data$city_lc_open_forest_forest_total~frugivore_paired_to_city_data$cooccur)
+paired_presence_shared_traits
+```
+```{r}
+paired_presence_shared_traits$cooccur_as_int = ifelse(paired_presence_shared_traits$cooccur, 1, 0)
+paired_presence_shared_traits$held_as_int = ifelse(paired_presence_shared_traits$status == 'HELD', 1, 0)
+
+paired_presence_shared_traits_scored = paired_presence_shared_traits %>% group_by(species, alternative_species, Trophic.Niche, Habitat) %>% summarise(n = n(), cooccur_sum = sum(cooccur_as_int), held_sum = sum(held_as_int), cooccur_rate = sum(cooccur_as_int) / n() * 100, held_rate = sum(held_as_int) / n() * 100)
+paired_presence_shared_traits_scored
 ```
 
 ```{r}
-mean(frugivore_paired_to_city_data[frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
-sd(frugivore_paired_to_city_data[frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
-
-mean(frugivore_paired_to_city_data[!frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
-sd(frugivore_paired_to_city_data[!frugivore_paired_to_city_data$cooccur,]$city_lc_open_forest_forest_total)
+ggplot(paired_presence_shared_traits_scored[paired_presence_shared_traits_scored$Trophic.Niche == 'Granivore',], aes(x = species, y = alternative_species)) + geom_point(aes(size = n, color = cooccur_rate)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +  scale_colour_gradientn(colours=rainbow(4)) + geom_abline()
 ```
-
 ```{r}
-frugivore_paired_to_city_data$city_lc_open_forest_forest_total_km = frugivore_paired_to_city_data$city_lc_open_forest_forest_total / 100
-
-frugivore_paired_summary = frugivore_paired_to_city_data %>% group_by(cooccur) %>% summarise(mean = mean(city_lc_open_forest_forest_total_km), sd = sd(city_lc_open_forest_forest_total_km))
-frugivore_paired_summary$lower_limit = frugivore_paired_summary$mean - frugivore_paired_summary$sd
-frugivore_paired_summary$upper_limit = frugivore_paired_summary$mean + frugivore_paired_summary$sd
-
-gg_frugivore_forest = ggplot(frugivore_paired_to_city_data, aes(x = cooccur)) +
-  geom_violin(aes(y = city_lc_open_forest_forest_total_km)) + 
-  geom_point(data = frugivore_paired_summary, aes(y = mean), color = "red") +
-  geom_text(data = frugivore_paired_summary, aes(y = mean, label = round(mean, 1)), color = "red", nudge_x = 0.2) +
-  geom_errorbar(data = frugivore_paired_summary, aes(ymin= lower_limit, ymax = upper_limit), color = "red", width = 0.2) +
-  geom_text(data = frugivore_paired_summary, aes(y = lower_limit, label = round(lower_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  geom_text(data = frugivore_paired_summary, aes(y = upper_limit, label = round(upper_limit, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  xlab('Species pair co-occur') + ylab('Total open forest cover km2') + labs(title='Frugivore/Insessorial co-occurance\nvs total open forest cover', subtitle = 'chi-squared = 55.352, df = 1, p-value < 0.001')
-gg_frugivore_forest
+ggplot(paired_presence_shared_traits_scored[paired_presence_shared_traits_scored$Trophic.Niche == 'Granivore',], aes(x = species, y = alternative_species)) + geom_point(aes(size = n, color = held_rate)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +  scale_colour_gradientn(colours=rainbow(4)) + geom_abline()
 ```
-
-## Reduce predictors for Forest dwellers using stepwise reduction
- [1] "city_lc_open_forest_evergreen_broadleaf"   "city_lc_open_forest_forest_total"          "city_lc_permanent_water"                   "city_lc_closed_forest_forest_total"       
- [5] "city_lc_closed_forest_evergreen_broadleaf" "city_pc_open_forest_evergreen_broadleaf"   "city_rainfall_average_annual"              "city_pc_closed_forest_evergreen_broadleaf"
- [9] "city_lc_area"                              "region_50_surface_moisture"                "city_rainfall_average_min_monthly"  
- 
-```{r}
-forest_predictors_pca <- rda(forest_paired_to_city_data[,c("city_lc_open_forest_evergreen_broadleaf","city_lc_open_forest_forest_total","city_lc_permanent_water" ,"city_lc_closed_forest_evergreen_broadleaf","city_pc_open_forest_evergreen_broadleaf","city_rainfall_average_annual","city_pc_closed_forest_evergreen_broadleaf","city_lc_area","region_50_surface_moisture","city_rainfall_average_min_monthly")])
-summary(forest_predictors_pca)
-```
-
-```{r}
-biplot(forest_predictors_pca, scaling = -1)
-```
-
-```{r}
-plot(forest_predictors_pca, display = "sites")
-with(forest_paired_to_city_data, ordiellipse(forest_predictors_pca, cooccur, col=4, lwd=2, draw = "polygon", kind = c("sd"))) 
-with(forest_paired_to_city_data, ordispider(forest_predictors_pca, cooccur, label=TRUE))
-```
-
-```{r}
-forest_ef <- envfit(forest_predictors_pca, forest_paired_to_city_data[,c("city_lc_open_forest_evergreen_broadleaf","city_lc_open_forest_forest_total","city_lc_permanent_water" ,"city_lc_closed_forest_evergreen_broadleaf","city_pc_open_forest_evergreen_broadleaf","city_rainfall_average_annual","city_pc_closed_forest_evergreen_broadleaf","city_lc_area","region_50_surface_moisture","city_rainfall_average_min_monthly")], na.rm = TRUE, permu = 999) 
-
-plot(forest_predictors_pca, display = "sites")
-plot(forest_ef, p.max = 0.05)
-```
-
-```{r}
-jpeg("outputs/som_pca_forest_dwellers_landscape_vars.jpg", width = 1024, height=778)
-plot(forest_predictors_pca, display = "sites")
-plot(forest_ef, p.max = 0.05)
-dev.off()
-```
-
-```{r}
-forest_paired_to_city_data$pc1 = forest_predictors_pca$Ybar[,1]
-forest_paired_to_city_data$pc2 = forest_predictors_pca$Ybar[,2]
-
-forest_paired_summary = forest_paired_to_city_data %>% group_by(cooccur) %>% summarise(mean_pc1 = mean(pc1), sd_pc1 = sd(pc1), mean_pc2 = mean(pc2), sd_pc2 = sd(pc2))
-forest_paired_summary$lower_limit_pc1 = forest_paired_summary$mean_pc1 - forest_paired_summary$sd_pc1
-forest_paired_summary$upper_limit_pc1 = forest_paired_summary$mean_pc1 + forest_paired_summary$sd_pc1
-forest_paired_summary$lower_limit_pc2 = forest_paired_summary$mean_pc2 - forest_paired_summary$sd_pc2
-forest_paired_summary$upper_limit_pc2 = forest_paired_summary$mean_pc2 + forest_paired_summary$sd_pc2
-```
-
-```{r}
-kruskal.test(forest_paired_to_city_data$pc1~forest_paired_to_city_data$cooccur)
-```
-
-```{r}
-kruskal.test(forest_paired_to_city_data$pc2~forest_paired_to_city_data$cooccur)
-```
-
-```{r}
-gg_forest_pc1 = ggplot(forest_paired_to_city_data, aes(x = cooccur)) +
-  geom_violin(aes(y = pc1)) + 
-  geom_point(data = forest_paired_summary, aes(y = mean_pc1), color = "red") +
-  geom_text(data = forest_paired_summary, aes(y = mean_pc1, label = round(mean_pc1, 1)), color = "red", nudge_x = 0.2) +
-  geom_errorbar(data = forest_paired_summary, aes(ymin= lower_limit_pc1, ymax = upper_limit_pc1), color = "red", width = 0.2) +
-  geom_text(data = forest_paired_summary, aes(y = lower_limit_pc1, label = round(lower_limit_pc1, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  geom_text(data = forest_paired_summary, aes(y = upper_limit_pc1, label = round(upper_limit_pc1, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  xlab('Species pair co-occur') + ylab('PC1 - Closed Forest / Average Rainfall') + labs(title='Forest Dwellers\nvs city landscape PC1 (99.7%)', subtitle = 'chi-squared = 62.286, df = 1, p-value < 0.001')
-gg_forest_pc1
-```
-                                                                                                                                                      
-
-```{r}
-ggplot(forest_paired_to_city_data, aes(x = cooccur)) +
-  geom_violin(aes(y = pc2)) + 
-  geom_point(data = forest_paired_summary, aes(y = mean_pc2), color = "red") +
-  geom_text(data = forest_paired_summary, aes(y = mean_pc2, label = round(mean_pc2, 1)), color = "red", nudge_x = 0.2) +
-  geom_errorbar(data = forest_paired_summary, aes(ymin= lower_limit_pc2, ymax = upper_limit_pc2), color = "red", width = 0.2) +
-  geom_text(data = forest_paired_summary, aes(y = lower_limit_pc2, label = round(lower_limit_pc2, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  geom_text(data = forest_paired_summary, aes(y = upper_limit_pc2, label = round(upper_limit_pc2, 1)), color = "red", nudge_x = 0.2, size = 3) +
-  xlab('Species pair co-occur') + ylab('PC2 - Open Forest / Min rainfall / City Area') + labs(title='Forest Dwellers\nvs city landscape PC2 (0.001%)', subtitle = 'chi-squared = 59.437, df = 1, p-value < 0.001')
-```
-
-```{r}
-gg_coocurr_to_landscape = grid.arrange(gg_frugivore_forest, gg_forest_pc1,  ncol = 2, nrow = 1)
-gg_coocurr_to_landscape
-```
-
-```{r}
-ggsave('./outputs/cooccurance_based_on_landscape.jpg', gg_coocurr_to_landscape, units = "px", width=2256, height=1736)
-```
-

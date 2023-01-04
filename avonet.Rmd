@@ -95,7 +95,7 @@ pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$trophic_niche)
 
 ```
 -
-- Urban tolerance was significantly different between different trophic niches (Chi-squared=19.31, df=2, p<0.001), with urban tolerance significantly 
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=14.8, df=2, p<0.001), with urban tolerance significantly 
 - lower in Frugivores compared to Granivores.
 -
 ```
@@ -103,6 +103,12 @@ pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$trophic_niche)
 ```{r}
 kruskal.test(pigeons5$urban_tolerance~pigeons5$trophic_niche)
 pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$trophic_niche)
+```
+
+## Get mean + sd  by trophic niche
+
+```{r}
+pigeons %>% group_by(trophic_niche) %>% summarise(mean = mean(urban_tolerance), sd = sd(urban_tolerance), min = min(urban_tolerance), max = max(urban_tolerance))
 ```
 
 # Compare Habitat
@@ -125,13 +131,19 @@ pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$habitat)
 
 ```
 -
-- Urban tolerance was significantly different between different trophic niches (Chi-squared=42.834, df=6, p<0.001)
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=54.2, df=6, p<0.001)
 -
 ```
 
 ```{r}
 kruskal.test(pigeons5$urban_tolerance~pigeons5$habitat)
 pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$habitat)
+```
+
+## Get mean + sd  by habitat
+
+```{r}
+pigeons %>% group_by(habitat) %>% summarise(mean = mean(urban_tolerance), sd = sd(urban_tolerance), min = min(urban_tolerance), max = max(urban_tolerance))
 ```
 
 ```{r}
@@ -145,11 +157,17 @@ figure3 = ggarrange(ncol = 2, nrow = 1,
 annotate_figure(figure3, left = textGrob("Urban tolerance", rot = 90, vjust = 1, gp = gpar(cex = 1.3)),
                     bottom = textGrob("Habitat Density"))
 ```
+
 ```{r}
 kruskal.test(pigeons$urban_tolerance~pigeons$habitat_density)
 pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$habitat_density)
 ```
 
+## Get mean + sd  by habitat density
+
+```{r}
+pigeons %>% group_by(habitat_density) %>% summarise(mean = mean(urban_tolerance), sd = sd(urban_tolerance), min = min(urban_tolerance), max = max(urban_tolerance))
+```
 
 # Compare Lifestyle
 ```{r}
@@ -171,7 +189,7 @@ pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$primary_lifestyle)
 
 ```
 -
-- Urban tolerance was significantly different between different trophic niches (Chi-squared=7.23, df=2, p = 0.03), with urban tolerance significantly 
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=11.1, df=2, p = 0.004), with urban tolerance significantly 
 - lower in Insessorial (perching) compared to Terrestrial and Generalist
 -
 ```
@@ -181,6 +199,11 @@ kruskal.test(pigeons5$urban_tolerance~pigeons5$primary_lifestyle)
 pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$primary_lifestyle)
 ```
 
+## Get mean + sd  by lifestyle
+
+```{r}
+pigeons %>% group_by(primary_lifestyle) %>% summarise(mean = mean(urban_tolerance), sd = sd(urban_tolerance), min = min(urban_tolerance), max = max(urban_tolerance))
+```
 
 # Create at locomotion trait
 ```{r}

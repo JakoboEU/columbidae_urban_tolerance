@@ -26,6 +26,10 @@ Check for species from data not in tree
 col_ut[!col_ut$jetz_scientific_name %in% tree$tip.label,]
 ```
 
+Number of species in analysis:
+```{r}
+nrow(col_ut)
+```
 
 Format data
 ```{r}
@@ -44,6 +48,12 @@ col_ut_phylo_signal <- phylosig(tree_pruned_to_columbidae, columbidae_response, 
 col_ut_phylo_signal
 ```
 
+```
+-
+- Phylogenetic analysis containing all 160 species and produced a significant phylogenetic signal for urban tolerance (lambda: 0.16, LR(lambda=0): 2.34, p = 0.13)
+-
+```
+
 Show the results for species
 ```{r}
 col_continuous_trait_evolution <- contMap(tree_pruned_to_columbidae, columbidae_response)
@@ -57,9 +67,7 @@ cte_all = plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, 
 cte_all
 ```
 
-----
-What about species in very few regional pools?
-----------------------------------------------
+## What about species in very few regional pools?
 ```{r}
 ggplot(col_ut, aes(x = region_count)) + geom_bar()
 ```
@@ -87,8 +95,7 @@ Are species in low numbers of regional pool mostly present or absent?
 ggplot(col_ut[col_ut$region_count < 5,], aes(x = urban_tolerance)) + geom_bar()
 ```
 
-Is presence explained by number of regions?
--------------------------------------------
+## Is presence explained by number of regions?
 ```{r}
 summary(lm(formula = urban_tolerance ~ region_count, data = col_ut))
 ```
@@ -103,9 +110,7 @@ What about for higher numbers of regional pools?
 summary(lm(formula = urban_tolerance ~ region_count, data = col_ut[col_ut$region_count > 5, ]))
 ```
 
-----------------------------------------------
-What about species in at least 5 regional pools?
-----------------------------------------------
+## What about species in at least 5 regional pools?
 ```{r}
 col_ut5 = col_ut[col_ut$region_count >= 5,]
 ```
@@ -139,8 +144,7 @@ cte_5 = plot(col5_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, l
 cte_5
 ```
 
-Store CTE plots
----------------
+### Store CTE plots
 ```{r}
 par(mfrow=c(1,2)) 
 plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
@@ -158,9 +162,7 @@ text(0, 49, "Min. 5 regional pools", cex=2)
 dev.off()
 ```
 
------------------------
-Using Open Tree of Life
------------------------
+# Using Open Tree of Life
 Load a maximum clade credibility tree from open tree
 https://tree.opentreeoflife.org/opentree/opentree13.4@ott363030/Columbiformes
 

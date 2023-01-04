@@ -79,6 +79,10 @@ absent_cities
 ```
 
 ```{r}
+length(unique(intolerance_absence_records$jetz_scientific_name))
+```
+
+```{r}
 ggplot() +  
   geom_sf(data = country_outlines, aes(geometry = geometry)) +
   geom_sf(data = absent_cities, aes(geometry = geometry), shape = ABSENT_SHAPE, color = ABSENT_COLOUR, show.legend = "point") +

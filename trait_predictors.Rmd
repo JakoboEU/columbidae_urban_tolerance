@@ -59,7 +59,7 @@ pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$trophic_niche)
 
 ```
 -
-- Urban tolerance was significantly different between different trophic niches (Chi-squared=20.315, df=2, p<0.001), with urban tolerance significantly 
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=16.73, df=2, p<0.001), with urban tolerance significantly 
 - lower in Frugivores compared to Granivores.
 -
 ```
@@ -71,7 +71,7 @@ pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$trophic_niche)
 
 ```
 -
-- Urban tolerance was significantly different between different trophic niches (Chi-squared=19.238, df=2, p<0.001), with urban tolerance significantly 
+- Urban tolerance was significantly different between different trophic niches (Chi-squared=9.71, df=2, p<0.01), with urban tolerance significantly 
 - lower in Frugivores compared to Granivores.
 -
 ```
@@ -95,7 +95,7 @@ pairwise.wilcox.test(pigeons$urban_tolerance, pigeons$foraging_niche)
 
 ```
 -
-- Urban tolerance was significantly different between different foraging niches (Chi-squared=24.204, df=3, p<0.001), with urban tolerance significantly 
+- Urban tolerance was significantly different between different foraging niches (Chi-squared=18.7, df=3, p<0.001), with urban tolerance significantly 
 - higher in ground feeding granivores.
 -
 ```
@@ -107,7 +107,7 @@ pairwise.wilcox.test(pigeons5$urban_tolerance, pigeons5$foraging_niche)
 
 ```
 -
-- Urban tolerance was significantly different between different foraging niches (Chi-squared=19.238, df=2, p<0.001), with urban tolerance significantly 
+- Urban tolerance was significantly different between different foraging niches (Chi-squared=9.7, df=2, p<0.01), with urban tolerance significantly 
 - higher in ground feeding granivores.
 ```
 
@@ -163,7 +163,7 @@ cor.test(pigeons$urban_tolerance, pigeons$pc1, method="spearman")
 ```
 -
 - There is a significant negative correlation between urban tolerance and PC1
-- (Spearman's; n=144, p = 0.03, rho=-0.1807745)
+- (Spearman's; n=135, p = 0.07, rho=-0.1590928)
 -
 ```
 
@@ -173,8 +173,8 @@ cor.test(pigeons$urban_tolerance, pigeons$pc2, method="spearman")
 
 ```
 -
-- There is NOT a significant correlation between urban tolerance and PC2
-- (Spearman's; n=144, p = 0.393, rho=-0.0716447)
+- There is a significant correlation between urban tolerance and PC2
+- (Spearman's; n=135, p = 0.03, rho=-0.1900714)
 -
 ```
 
@@ -185,7 +185,7 @@ cor.test(pigeons$urban_tolerance, pigeons$pc3, method="spearman")
 ```
 -
 - There is NOT a significant correlation between urban tolerance and PC3
-- (Spearman's; n=144, p = 0.67, rho=0.03602794)
+- (Spearman's; n=135, p = 0.79, rho=-0.02353181)
 ```
 
 ```{r}
@@ -195,7 +195,7 @@ cor.test(pigeons$urban_tolerance, pigeons$pc4, method="spearman")
 ```
 -
 - There is NOT a significant correlation between urban tolerance and PC4
-- (Spearman's; n=144, p = 0.17, rho=-0.115925)
+- (Spearman's; n=135, p = 0.43, rho=-0.0691263)
 -
 ```
 
@@ -220,8 +220,8 @@ cor.test(pigeons5$urban_tolerance, pigeons5$pc1, method="spearman")
 
 ```
 -
--  There is a significant negative correlation between urban tolerance and PC1
-- (Spearman's; n=114, p = 0.015, rho=-0.2272254)
+-  There is NOT a significant negative correlation between urban tolerance and PC1
+- (Spearman's; n=84, p = 0.32, rho=-0.1089285)
 -
 ```
 
@@ -232,7 +232,7 @@ cor.test(pigeons5$urban_tolerance, pigeons5$pc2, method="spearman")
 ```
 -
 - There is NOT a significant correlation between urban tolerance and PC2
-- (Spearman's; n=114, p = 0.15, rho=-0.136747)
+- (Spearman's; n=84, p = 0.16, rho=-0.1531329)
 -
 ```
 
@@ -243,7 +243,7 @@ cor.test(pigeons5$urban_tolerance, pigeons5$pc3, method="spearman")
 ```
 -
 -  There is NOT a significant correlation between urban tolerance and PC3
-- (Spearman's; n=114, p = 0.57, rho=0.05381857)
+- (Spearman's; n=84, p = 0.9, rho=-0.01164579)
 -
 ```
 
@@ -254,7 +254,7 @@ cor.test(pigeons5$urban_tolerance, pigeons5$pc4, method="spearman")
 ```
 -
 -  There is NOT a significant correlation between urban tolerance and PC4
-- (Spearman's; n=114, p = 0.36, rho=-0.0857774)
+- (Spearman's; n=84, p = 0.46, rho=-0.08126199)
 -
 ```
 

@@ -66,6 +66,13 @@ col_continuous_trait_evolution$cols[1:colourCount] <- rev(col_continuous_trait_e
 cte_all = plot(col_continuous_trait_evolution, outline=FALSE, fsize=0.3, lwd=1, leg.txt="Cities/Regional Pools", type = "fan")
 cte_all
 ```
+## Find the age of each species (tip branch length)
+```{r}
+species_ages = tree_pruned_to_columbidae$edge.length[tree_pruned_to_columbidae$edge[, 2] %in% 1:Ntip(tree_pruned_to_columbidae)]
+tips <- tree_pruned_to_columbidae$edge[tree_pruned_to_columbidae$edge[, 2] %in%  1:Ntip(tree_pruned_to_columbidae), 2]
+names(species_ages) = tree_pruned_to_columbidae$tip.label[tips]
+species_ages
+```
 
 ## What about species in very few regional pools?
 ```{r}

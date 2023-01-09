@@ -1,0 +1,221 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+library(dplyr)
+library(purrr)
+library(tidyverse)
+library(tidyr)
+
+
+library(phytools)
+library(picante)
+library(abdiv)
+```
+
+```{r}
+rm(list = ls())
+```
+
+```{r}
+col_loc = read_csv('./bigquery_export__columbidae_jetz_urban_locations.csv')
+head(col_loc)
+```
+```{r}
+species_in_cities = pivot_wider(col_loc, names_from = jetz_scientific_name, values_from = "present_in_city", values_fill = list(present_in_city = F))
+species_in_cities = tibble::column_to_rownames(species_in_cities, var='city_id')
+species_in_cities
+```
+```{r}
+tree <- read.tree("./phylogeny__stage2_hackett_mcc_no_neg.tre")
+
+tree_pruned_to_urban_columbidae <- ladderize(drop.tip(tree, setdiff(tree$tip.label, colnames(species_in_cities))))
+
+phydist_urban_columbidae <- cophenetic(tree_pruned_to_urban_columbidae)
+```
+
+```{r}
+city.mntd.result <- ses.mntd(as.matrix(species_in_cities[,-1]), phydist_urban_columbidae, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
+city.mntd.result$city_id = as.double(rownames(city.mntd.result))
+city.mntd.result
+```
+
+
+```{r}
+city_meta_data = col_loc %>% group_by(city_id, city_name) %>% summarise(pool_richness = n(), urban_richness = sum(present_in_city))
+city_meta_data = right_join(city_meta_data, city.mntd.result[c('city_id', 'mntd.obs')])
+city_meta_data$null_model.avg.mntd.obs = NA
+city_meta_data$null_model.mntd.obs.wilcox.p_value = NA
+city_meta_data$null_model.mntd.obs.wilcox.estimate = NA
+city_meta_data$null_model.mntd.obs.wilcox.estimate_lower = NA
+city_meta_data$null_model.mntd.obs.wilcox.estimate_upper = NA
+city_meta_data$null_model.mntd.obs.wilcox.statistic = NA
+
+city_meta_data$faith_pd = NA
+city_meta_data$null_model.avg.faith_pd = NA
+city_meta_data$null_model.faith_pd.wilcox.p_value = NA
+city_meta_data$null_model.faith_pd.wilcox.estimate = NA
+city_meta_data$null_model.faith_pd.wilcox.estimate_lower = NA
+city_meta_data$null_model.faith_pd.wilcox.estimate_upper = NA
+city_meta_data$null_model.faith_pd.wilcox.statistic = NA
+
+
+city_meta_data[order(city_meta_data$city_name),]
+```
+
+```{r}
+city_id = 1786
+
+urban_richness = city_meta_data$urban_richness[city_meta_data$city_id == city_id]
+regional_richness = city_meta_data$pool_richness[city_meta_data$city_id == city_id]
+
+regional_species = col_loc$jetz_scientific_name[col_loc$city_id == city_id]
+
+create_null_model_sites = function(regional_richness, urban_richness, regional_species) {
+  null_model_sites = expand.grid(rep(list(TRUE:FALSE), regional_richness))
+  null_model_sites_species_richness =  data.frame(species_richness = pmap_dbl(null_model_sites, sum))
+  null_model_sites = cbind(null_model_sites, null_model_sites_species_richness)
+  
+  null_model_sites = null_model_sites[null_model_sites$species_richness == urban_richness,1:regional_richness]
+  colnames(null_model_sites) = regional_species
+  null_model_sites
+}
+
+null_model_sites = create_null_model_sites(regional_richness, urban_richness, regional_species)
+null_model_sites
+```
+
+```{r}
+mntd_of_sites = function(tree, regional_species, null_model_sites) {
+  tree_pruned_to_city <- ladderize(drop.tip(tree, setdiff(tree$tip.label, regional_species)))
+  
+  phydist_city <- cophenetic(tree_pruned_to_city)
+  
+  null_model.mntd.result <- ses.mntd(null_model_sites, phydist_city, null.model="taxa.labels", abundance.weighted=FALSE, runs=99)
+  null_model.mntd.result
+}
+
+null_model.mntd.result = mntd_of_sites(tree, regional_species, null_model_sites)
+null_model.mntd.result
+```
+
+```{r}
+wilcox_mntd_test = wilcox.test(null_model.mntd.result$mntd.obs, mu = city_meta_data$mntd.obs[city_meta_data$city_id == city_id], conf.int = TRUE)
+wilcox_mntd_test
+```
+
+```{r}
+tree_pruned_to_city_only <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_loc$jetz_scientific_name[col_loc$city_id == city_id & col_loc$present_in_city])))
+city.faith.result <- faith_pd(rep(1, length(tree_pruned_to_city_only$tip.label)), tree_pruned_to_city_only)
+city.faith.result
+```
+
+```{r}
+tree_pruned_to_region <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_loc$jetz_scientific_name[col_loc$city_id == city_id])))
+
+null_model.faith.result = c()
+
+for(row in null_model_sites) {
+  null_model.faith.result = append(null_model.faith.result, faith_pd(row, tree_pruned_to_region))
+}
+null_model.faith.result
+```
+
+```{r}
+wilcox_faith_test = wilcox.test(null_model.faith.result, mu = city.faith.result, conf.int = TRUE, conf.level = 0.5, exact = T)
+wilcox_faith_test
+```
+
+```{r}
+city_meta_data$null_model.avg.mntd.obs[city_meta_data$city_id == city_id] = mean(null_model.mntd.result$mntd.obs)
+city_meta_data$null_model.mntd.obs.wilcox.p_value[city_meta_data$city_id == city_id] = wilcox_mntd_test$p.value
+city_meta_data$null_model.mntd.obs.wilcox.estimate[city_meta_data$city_id == city_id] = wilcox_mntd_test$estimate
+city_meta_data$null_model.mntd.obs.wilcox.estimate_lower[city_meta_data$city_id == city_id] = wilcox_mntd_test$conf.int[1]
+city_meta_data$null_model.mntd.obs.wilcox.estimate_upper[city_meta_data$city_id == city_id] = wilcox_mntd_test$conf.int[2]
+city_meta_data$null_model.mntd.obs.wilcox.statistic[city_meta_data$city_id == city_id] = wilcox_mntd_test$statistic
+
+city_meta_data$faith_pd[city_meta_data$city_id == city_id] = city.faith.result
+city_meta_data$null_model.avg.faith_pd[city_meta_data$city_id == city_id] = mean(null_model.faith.result)
+city_meta_data$null_model.faith_pd.wilcox.p_value[city_meta_data$city_id == city_id] = wilcox_faith_test$p.value
+city_meta_data$null_model.faith_pd.wilcox.estimate[city_meta_data$city_id == city_id] = wilcox_faith_test$estimate
+city_meta_data$null_model.faith_pd.wilcox.estimate_lower[city_meta_data$city_id == city_id] = wilcox_faith_test$conf.int[1]
+city_meta_data$null_model.faith_pd.wilcox.estimate_upper[city_meta_data$city_id == city_id] = wilcox_faith_test$conf.int[2]
+city_meta_data$null_model.faith_pd.wilcox.statistic[city_meta_data$city_id == city_id] = wilcox_faith_test$statistic
+
+
+city_meta_data[city_meta_data$city_id == city_id,]
+```
+
+```{r, warning=F}
+# loop through each species that we can calculate PD.
+# e.g. have at least one urban species, and not all regional species present in city
+for (loop_city_id in city_meta_data$city_id[city_meta_data$urban_richness > 1 & city_meta_data$pool_richness != city_meta_data$urban_richness]) {
+  # richness
+  loop_urban_richness = city_meta_data$urban_richness[city_meta_data$city_id == loop_city_id]
+  loop_regional_richness = city_meta_data$pool_richness[city_meta_data$city_id == loop_city_id]
+
+  # species in region
+  loop_regional_species = col_loc$jetz_scientific_name[col_loc$city_id == loop_city_id]
+  
+  # create all possible null models for number of urban species from region
+  loop_null_model_sites = create_null_model_sites(loop_regional_richness, loop_urban_richness, loop_regional_species)
+  # calculate MNTD for null models
+  loop_null_model.mntd.result = mntd_of_sites(tree, loop_regional_species, loop_null_model_sites)
+  
+  # wilcoxon test to see if actual MNTD is different to null models
+  loop_wilcox_mntd_test = wilcox.test(loop_null_model.mntd.result$mntd.obs, mu = city_meta_data$mntd.obs[city_meta_data$city_id == loop_city_id], conf.int = TRUE, conf.level = 0.9)
+  
+  # calculate faith PD for actual urban species
+  loop_tree_pruned_to_city_only <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_loc$jetz_scientific_name[col_loc$city_id == city_id & col_loc$present_in_city])))
+  loop_city.faith.result <- faith_pd(rep(1, length(loop_tree_pruned_to_city_only$tip.label)), loop_tree_pruned_to_city_only)
+
+  # calculate faith PD for each null model
+  loop_tree_pruned_to_region <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_loc$jetz_scientific_name[col_loc$city_id == city_id])))
+
+  loop_null_model.faith.result = c()
+  for(row in null_model_sites) {
+    loop_null_model.faith.result = append(loop_null_model.faith.result, faith_pd(row, loop_tree_pruned_to_region))
+  }
+
+  # wilcoxon test to see if actual faith PD is different to null models
+  loop_wilcox_faith_test = wilcox.test(loop_null_model.faith.result, mu = loop_city.faith.result, conf.int = TRUE, conf.level = 0.5)
+
+  # store results
+  
+  # mntd
+  city_meta_data$null_model.avg.mntd.obs[city_meta_data$city_id == loop_city_id] = mean(loop_null_model.mntd.result$mntd.obs)
+  city_meta_data$null_model.mntd.obs.wilcox.p_value[city_meta_data$city_id == loop_city_id] = loop_wilcox_mntd_test$p.value
+  city_meta_data$null_model.mntd.obs.wilcox.estimate[city_meta_data$city_id == loop_city_id] = loop_wilcox_mntd_test$estimate
+  city_meta_data$null_model.mntd.obs.wilcox.estimate_lower[city_meta_data$city_id == loop_city_id] = loop_wilcox_mntd_test$conf.int[1]
+  city_meta_data$null_model.mntd.obs.wilcox.estimate_upper[city_meta_data$city_id == loop_city_id] = loop_wilcox_mntd_test$conf.int[2]
+  city_meta_data$null_model.mntd.obs.wilcox.statistic[city_meta_data$city_id == loop_city_id] = loop_wilcox_mntd_test$statistic
+  
+  # faith
+  city_meta_data$faith_pd[city_meta_data$city_id == loop_city_id] = loop_city.faith.result
+  city_meta_data$null_model.avg.faith_pd[city_meta_data$city_id == loop_city_id] = mean(loop_null_model.faith.result)
+  city_meta_data$null_model.faith_pd.wilcox.p_value[city_meta_data$city_id == loop_city_id] = loop_wilcox_faith_test$p.value
+  city_meta_data$null_model.faith_pd.wilcox.estimate[city_meta_data$city_id == loop_city_id] = loop_wilcox_faith_test$estimate
+  city_meta_data$null_model.faith_pd.wilcox.estimate_lower[city_meta_data$city_id == loop_city_id] = loop_wilcox_faith_test$conf.int[1]
+  city_meta_data$null_model.faith_pd.wilcox.estimate_upper[city_meta_data$city_id == loop_city_id] = loop_wilcox_faith_test$conf.int[2]
+  city_meta_data$null_model.faith_pd.wilcox.statistic[city_meta_data$city_id == loop_city_id] = loop_wilcox_faith_test$statistic
+}
+
+city_meta_data
+```
+
+```{r}
+wilcox.test(city_meta_data$null_model.avg.mntd.obs, city_meta_data$mntd.obs, paired = T)
+mean(city_meta_data$null_model.avg.mntd.obs, na.rm = T)
+mean(city_meta_data$mntd.obs, na.rm = T)
+```
+```{r}
+wilcox.test(city_meta_data$null_model.avg.faith_pd, city_meta_data$faith_pd, paired = T)
+mean(city_meta_data$null_model.avg.faith_pd, na.rm = T)
+mean(city_meta_data$faith_pd, na.rm = T)
+```
+```{r}
+write_csv(city_meta_data, file = 'outputs/city_phylogentic_richness.csv')
+```
+

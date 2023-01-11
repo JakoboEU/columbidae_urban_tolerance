@@ -105,6 +105,19 @@ null_model.mntd.result
 wilcox_mntd_test = wilcox.test(null_model.mntd.result$mntd.obs, mu = city_meta_data$mntd.obs[city_meta_data$city_id == city_id], conf.int = TRUE)
 wilcox_mntd_test
 ```
+```{r}
+get_rank = function(value, available_values) {
+  available = unique(round(available_values, 4))
+  df = data.frame(available = available)
+  df$rank = rank(df$available, ties.method = "average")
+  df$rank[df$available == round(value, 4)] / length(available) * 100
+}
+```
+
+
+```{r}
+get_rank(city_meta_data$mntd.obs[city_meta_data$city_id == city_id], null_model.mntd.result$mntd.obs)
+```
 
 ```{r}
 tree_pruned_to_city_only <- ladderize(drop.tip(tree, setdiff(tree$tip.label, col_loc$jetz_scientific_name[col_loc$city_id == city_id & col_loc$present_in_city])))
@@ -126,6 +139,9 @@ null_model.faith.result
 ```{r}
 wilcox_faith_test = wilcox.test(null_model.faith.result, mu = city.faith.result, conf.int = TRUE, conf.level = 0.5, exact = T)
 wilcox_faith_test
+```
+```{r}
+get_rank(city.faith.result, null_model.faith.result)
 ```
 
 ```{r}
@@ -210,11 +226,13 @@ wilcox.test(city_meta_data$null_model.avg.mntd.obs, city_meta_data$mntd.obs, pai
 mean(city_meta_data$null_model.avg.mntd.obs, na.rm = T)
 mean(city_meta_data$mntd.obs, na.rm = T)
 ```
+
 ```{r}
 wilcox.test(city_meta_data$null_model.avg.faith_pd, city_meta_data$faith_pd, paired = T)
 mean(city_meta_data$null_model.avg.faith_pd, na.rm = T)
 mean(city_meta_data$faith_pd, na.rm = T)
 ```
+
 ```{r}
 write_csv(city_meta_data, file = 'outputs/city_phylogentic_richness.csv')
 ```

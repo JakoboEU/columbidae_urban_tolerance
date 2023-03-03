@@ -218,6 +218,7 @@ world_cities_mntd$latitude = st_coordinates(world_cities_mntd)[,2]
 model_mntd_by_latitude = glm(data = world_cities_mntd, formula = mntd_increase ~ I(latitude^2))
 summary(model_mntd_by_latitude)
 ```
+
 ```{r}
 with(summary(model_mntd_by_latitude), 1 - deviance/null.deviance)
 ```
@@ -255,6 +256,7 @@ mntd_plot = grid.arrange(gg_mntd_by_abs_latitude, gg_mntd_world, gg_mntd_change,
 )
 mntd_plot
 ```
+
 ```{r}
 ggsave("./outputs/mntd.jpg", mntd_plot, height = 3074, width=4112, units = "px")
 ```
@@ -586,6 +588,7 @@ chisq.habitat
 round(chisq.habitat$residuals, 2)
 corrplot(chisq.habitat$residuals, is.cor = FALSE)
 ```
+
 ```{r}
 jpeg("outputs/som_pairs_by_habitat.jpg", width = 1024, height=778)
 corrplot(chisq.habitat$residuals, is.cor = FALSE)
@@ -723,6 +726,7 @@ dev.off()
 ```{r}
 paired_presence_shared_traits
 ```
+
 ```{r}
 paired_presence_shared_traits$cooccur_as_int = ifelse(paired_presence_shared_traits$cooccur, 1, 0)
 paired_presence_shared_traits$held_as_int = ifelse(paired_presence_shared_traits$status == 'HELD', 1, 0)
@@ -734,6 +738,7 @@ paired_presence_shared_traits_scored
 ```{r}
 ggplot(paired_presence_shared_traits_scored[paired_presence_shared_traits_scored$Trophic.Niche == 'Granivore',], aes(x = species, y = alternative_species)) + geom_point(aes(size = n, color = cooccur_rate)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +  scale_colour_gradientn(colours=rainbow(4)) + geom_abline()
 ```
+
 ```{r}
 ggplot(paired_presence_shared_traits_scored[paired_presence_shared_traits_scored$Trophic.Niche == 'Granivore',], aes(x = species, y = alternative_species)) + geom_point(aes(size = n, color = held_rate)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +  scale_colour_gradientn(colours=rainbow(4)) + geom_abline()
 ```
